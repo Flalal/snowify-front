@@ -20,6 +20,7 @@ export const discordRpc = signal(false);
 export const country = signal('');
 
 // ─── Transient signals (not persisted) ───
+export const pendingRadioNav = signal(null);
 export const currentView = signal('home');
 export const queue = signal([]);
 export const originalQueue = signal([]);

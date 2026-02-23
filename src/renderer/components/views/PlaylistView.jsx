@@ -3,6 +3,7 @@ import { playlists, likedSongs, saveState, currentView } from '../../state/index
 import { TrackList } from '../shared/TrackList.jsx';
 import { showToast } from '../shared/Toast.jsx';
 import { showInputModal } from '../shared/InputModal.jsx';
+import { showContextMenu } from '../shared/ContextMenu.jsx';
 
 /**
  * PlaylistView - Detail view for a playlist (liked songs or custom).
@@ -91,99 +92,10 @@ export function PlaylistView({
   }
 
   function handlePlaylistTrackContextMenu(e, track) {
-    e.preventDefault();
-    const idx = tracks.findIndex(t => t.id === track.id);
-    showPlaylistTrackMenu(e, track, idx);
-  }
-
-  function showPlaylistTrackMenu(e, track, idx) {
-    // Remove any existing context menus
-    document.querySelectorAll('.context-menu').forEach(m => m.remove());
-
-    const liked = likedSongs.value.some(t => t.id === track.id);
-    const menu = document.createElement('div');
-    menu.className = 'context-menu';
-    menu.style.left = e.clientX + 'px';
-    menu.style.top = e.clientY + 'px';
-
-    menu.innerHTML = `
-      <div class="context-menu-item" data-action="play">Play</div>
-      <div class="context-menu-item" data-action="play-next">Play Next</div>
-      <div class="context-menu-item" data-action="add-queue">Add to Queue</div>
-      <div class="context-menu-divider"></div>
-      <div class="context-menu-item" data-action="like">${liked ? 'Unlike' : 'Like'}</div>
-      <div class="context-menu-divider"></div>
-      <div class="context-menu-item" data-action="remove">Remove from ${isLiked ? 'Liked Songs' : 'playlist'}</div>
-      ${!isLiked && idx > 0 ? '<div class="context-menu-item" data-action="move-up">Move up</div>' : ''}
-      ${!isLiked && idx < tracks.length - 1 ? '<div class="context-menu-item" data-action="move-down">Move down</div>' : ''}
-      <div class="context-menu-divider"></div>
-      <div class="context-menu-item" data-action="share">Copy Link</div>
-    `;
-
-    document.body.appendChild(menu);
-    const rect = menu.getBoundingClientRect();
-    if (rect.right > window.innerWidth) menu.style.left = (window.innerWidth - rect.width - 8) + 'px';
-    if (rect.bottom > window.innerHeight) menu.style.top = (window.innerHeight - rect.height - 8) + 'px';
-
-    function removeMenu() {
-      document.querySelectorAll('.context-menu').forEach(m => m.remove());
-    }
-
-    menu.addEventListener('click', (ev) => {
-      const item = ev.target.closest('.context-menu-item');
-      if (!item) return;
-      const action = item.dataset.action;
-
-      switch (action) {
-        case 'play':
-          if (onPlayFromList) onPlayFromList([track], 0);
-          break;
-        case 'play-next':
-          showToast('Added to play next');
-          break;
-        case 'add-queue':
-          showToast('Added to queue');
-          break;
-        case 'like':
-          if (onLike) onLike(track, null);
-          break;
-        case 'remove':
-          if (isLiked) {
-            likedSongs.value = likedSongs.value.filter(t => t.id !== track.id);
-            saveState();
-            showToast('Removed from Liked Songs');
-          } else {
-            playlist.tracks.splice(idx, 1);
-            saveState();
-            showToast('Removed from playlist');
-          }
-          setRenderKey(k => k + 1);
-          break;
-        case 'move-up':
-          if (!isLiked && idx > 0) {
-            [playlist.tracks[idx - 1], playlist.tracks[idx]] = [playlist.tracks[idx], playlist.tracks[idx - 1]];
-            saveState();
-            setRenderKey(k => k + 1);
-          }
-          break;
-        case 'move-down':
-          if (!isLiked && idx < tracks.length - 1) {
-            [playlist.tracks[idx], playlist.tracks[idx + 1]] = [playlist.tracks[idx + 1], playlist.tracks[idx]];
-            saveState();
-            setRenderKey(k => k + 1);
-          }
-          break;
-        case 'share':
-          navigator.clipboard.writeText(track.url || `https://music.youtube.com/watch?v=${track.id}`);
-          showToast('Link copied to clipboard');
-          break;
-      }
-      removeMenu();
+    showContextMenu(e, track, {
+      onPlay: (t) => { if (onPlayFromList) onPlayFromList([t], 0); },
+      onLike: (t) => { if (onLike) onLike(t, null); },
     });
-
-    setTimeout(() => {
-      document.addEventListener('click', removeMenu, { once: true });
-    }, 10);
   }
 
   // Build cover content

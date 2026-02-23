@@ -1,4 +1,5 @@
 import { ArtistLink } from './ArtistLink.jsx';
+import { showContextMenu } from './ContextMenu.jsx';
 
 /**
  * A single row in a track list.
@@ -35,8 +36,11 @@ export function TrackRow({
   }
 
   function handleContextMenu(e) {
-    e.preventDefault();
-    if (onContextMenu) onContextMenu(e, track);
+    if (onContextMenu) {
+      onContextMenu(e, track);
+    } else {
+      showContextMenu(e, track);
+    }
   }
 
   function handleDragStart(e) {

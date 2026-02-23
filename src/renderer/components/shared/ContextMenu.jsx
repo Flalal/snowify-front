@@ -1,6 +1,7 @@
 import { signal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
-import { playlists, likedSongs, queue, queueIndex } from '../../state/index.js';
+import { playlists, likedSongs, queue, queueIndex, pendingRadioNav, saveState } from '../../state/index.js';
+import { showToast } from './Toast.jsx';
 import { escapeHtml } from '../../utils/escapeHtml.js';
 
 const menuVisible = signal(false);
@@ -101,6 +102,28 @@ export function ContextMenu() {
       case 'add-to-playlist':
         if (options.onAddToPlaylist) options.onAddToPlaylist(pid, track);
         break;
+      case 'start-radio': {
+        const radioName = `Radio: ${track.title}`;
+        const existing = playlists.value.find(p => p.name === radioName);
+        if (existing) {
+          pendingRadioNav.value = existing;
+        } else {
+          showToast('Creating radio...');
+          window.snowify.getUpNexts(track.id).then(upNexts => {
+            const newPlaylist = {
+              id: 'pl_' + Date.now(),
+              name: radioName,
+              tracks: [track, ...upNexts].slice(0, 21),
+            };
+            playlists.value = [...playlists.value, newPlaylist];
+            saveState();
+            pendingRadioNav.value = newPlaylist;
+          }).catch(() => {
+            showToast('Failed to create radio');
+          });
+        }
+        break;
+      }
       case 'share':
         if (options.onShare) {
           options.onShare(track);
@@ -183,6 +206,9 @@ export function ContextMenu() {
       </div>
       <div className="context-menu-item" data-action="like" onClick={() => handleAction('like')}>
         {isLiked ? 'Unlike' : 'Like'}
+      </div>
+      <div className="context-menu-item" data-action="start-radio" onClick={() => handleAction('start-radio')}>
+        Start Radio
       </div>
       {playlistSection}
       <div className="context-menu-divider" />

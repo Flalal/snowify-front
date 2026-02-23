@@ -6,6 +6,7 @@ import {
   shuffle, repeat, volume, autoplay, audioQuality, discordRpc,
   likedSongs, recentTracks, playlists, followedArtists,
   currentTrack, currentPlaylistId, animations, effects, theme, country,
+  pendingRadioNav,
   saveState, saveStateNow, loadState
 } from '../state/index.js';
 
@@ -17,6 +18,7 @@ import { SearchView } from './views/SearchView.jsx';
 import { QueuePanel } from './overlays/QueuePanel.jsx';
 import { showToast } from './shared/Toast.jsx';
 import { Toast } from './shared/Toast.jsx';
+import { ContextMenu } from './shared/ContextMenu.jsx';
 import { InputModal } from './shared/InputModal.jsx';
 import { PlaylistPickerModal } from './shared/PlaylistPickerModal.jsx';
 import { Spinner } from './shared/Spinner.jsx';
@@ -456,6 +458,15 @@ export function App() {
     switchView('playlist');
   }, [switchView]);
 
+  // ─── Radio navigation (from ContextMenu) ───
+  useEffect(() => {
+    const pl = pendingRadioNav.value;
+    if (pl) {
+      pendingRadioNav.value = null;
+      showPlaylistDetail(pl, false);
+    }
+  }, [pendingRadioNav.value, showPlaylistDetail]);
+
   const showAlbumDetail = useCallback((albumId, albumMeta) => {
     albumViewState.value = { albumId, albumMeta };
     switchView('album');
@@ -624,6 +635,7 @@ export function App() {
         {spotifyVisible && <SpotifyImport visible={spotifyVisible} onClose={() => setSpotifyVisible(false)} />}
       </Suspense>
 
+      <ContextMenu />
       <Toast />
       <InputModal />
       <PlaylistPickerModal />

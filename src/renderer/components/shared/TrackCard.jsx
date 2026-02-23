@@ -1,4 +1,5 @@
 import { ArtistLink } from './ArtistLink.jsx';
+import { showContextMenu } from './ContextMenu.jsx';
 
 /**
  * A card-style track display used in home/recommendations sections.
@@ -15,8 +16,11 @@ export function TrackCard({ track, onPlay, onContextMenu, onDragStart }) {
   }
 
   function handleContextMenu(e) {
-    e.preventDefault();
-    if (onContextMenu) onContextMenu(e, track);
+    if (onContextMenu) {
+      onContextMenu(e, track);
+    } else {
+      showContextMenu(e, track);
+    }
   }
 
   function handleDragStart(e) {
