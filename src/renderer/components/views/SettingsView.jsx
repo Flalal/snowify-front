@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 import {
   autoplay, audioQuality, videoQuality, videoPremuxed,
   animations, effects, theme, discordRpc, country,
@@ -23,12 +23,31 @@ function applyThemeToDOM(themeName) {
  *   onRenderHome - callback() to re-render home after clearing history
  */
 export function SettingsView({ onRenderHome }) {
-  // Apply theme on mount
+  // ── Auto-update state ──
+  const [updateStatus, setUpdateStatus] = useState('idle'); // idle | checking | available | downloading | ready
+  const [updateVersion, setUpdateVersion] = useState('');
+  const [downloadPercent, setDownloadPercent] = useState(0);
+
+  // Apply theme on mount + listen for update events
   useEffect(() => {
     applyThemeToDOM(theme.value);
     document.documentElement.classList.toggle('no-animations', !animations.value);
     document.documentElement.classList.toggle('no-effects', !effects.value);
     if (country.value) window.snowify.setCountry(country.value);
+
+    window.snowify.onUpdateAvailable((info) => {
+      setUpdateVersion(info.version);
+      setUpdateStatus('available');
+    });
+    window.snowify.onUpdateNotAvailable(() => {
+      setUpdateStatus('idle');
+    });
+    window.snowify.onDownloadProgress((info) => {
+      setDownloadPercent(Math.round(info.percent));
+    });
+    window.snowify.onUpdateDownloaded(() => {
+      setUpdateStatus('ready');
+    });
   }, []);
 
   // ── Settings change handlers ──
@@ -120,6 +139,30 @@ export function SettingsView({ onRenderHome }) {
     }
   }
 
+  async function handleCheckForUpdates() {
+    setUpdateStatus('checking');
+    try {
+      await window.snowify.checkForUpdates();
+    } catch {
+      setUpdateStatus('idle');
+    }
+  }
+
+  async function handleDownloadUpdate() {
+    setUpdateStatus('downloading');
+    setDownloadPercent(0);
+    try {
+      await window.snowify.downloadUpdate();
+    } catch {
+      setUpdateStatus('available');
+      showToast('Download failed');
+    }
+  }
+
+  function handleInstallUpdate() {
+    window.snowify.installUpdate();
+  }
+
   function handleResetAll() {
     if (confirm('Reset ALL data? This will delete all playlists, liked songs, and settings.')) {
       localStorage.removeItem('snowify_state');
@@ -129,6 +172,41 @@ export function SettingsView({ onRenderHome }) {
 
   return (
     <div className="settings-content">
+      {/* ── Updates ── */}
+      <div className="settings-section">
+        <h2>Updates</h2>
+        <div className="settings-row">
+          <label>Current version</label>
+          <span>Snowify v1.0.4</span>
+        </div>
+        <div className="settings-row">
+          {updateStatus === 'idle' && (
+            <button className="btn-secondary" onClick={handleCheckForUpdates}>
+              Check for updates
+            </button>
+          )}
+          {updateStatus === 'checking' && (
+            <span>Checking for updates...</span>
+          )}
+          {updateStatus === 'available' && (
+            <>
+              <span>v{updateVersion} available</span>
+              <button className="btn-secondary" onClick={handleDownloadUpdate}>
+                Download
+              </button>
+            </>
+          )}
+          {updateStatus === 'downloading' && (
+            <span>Downloading... {downloadPercent}%</span>
+          )}
+          {updateStatus === 'ready' && (
+            <button className="btn-secondary" onClick={handleInstallUpdate}>
+              Restart & Update
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* ── Country ── */}
       <div className="settings-section">
         <h2>Region</h2>

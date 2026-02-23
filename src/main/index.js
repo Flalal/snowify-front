@@ -17,6 +17,10 @@ import * as searchHandlers from './ipc/search.handlers.js';
 import * as shellHandlers from './ipc/shell.handlers.js';
 import * as spotifyHandlers from './ipc/spotify.handlers.js';
 import * as streamHandlers from './ipc/stream.handlers.js';
+import * as updaterHandlers from './ipc/updater.handlers.js';
+
+// ─── Auto-Update ───
+import { initUpdater } from './services/updater.js';
 
 // ─── Window State ───
 let mainWindow;
@@ -85,10 +89,12 @@ searchHandlers.register(ipcMain, deps);
 shellHandlers.register(ipcMain, deps);
 spotifyHandlers.register(ipcMain, deps);
 streamHandlers.register(ipcMain, deps);
+updaterHandlers.register(ipcMain, deps);
 
 // ─── App Lifecycle ───
 app.whenReady().then(async () => {
   createWindow();
+  initUpdater(mainWindow);
   initYTMusic().catch(err => console.error('YTMusic init failed:', err));
 });
 
