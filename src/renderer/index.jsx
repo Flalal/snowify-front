@@ -1,5 +1,6 @@
 import { render } from 'preact';
 import { App } from './components/App.jsx';
+import { ErrorBoundary } from './components/shared/ErrorBoundary.jsx';
 
 // Import all CSS modules
 import './styles/variables.css';
@@ -29,4 +30,4 @@ import './styles/animations.css';
 import './styles/quickpicks.css';
 import './styles/views.css';
 
-render(<App />, document.getElementById('root'));
+render(<ErrorBoundary><App /></ErrorBoundary>, document.getElementById('root'));
