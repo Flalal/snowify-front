@@ -30,6 +30,7 @@ export function initUpdater(mainWindow) {
 
   autoUpdater.on('error', (err) => {
     console.error('Auto-update error:', err?.message || err);
+    send('update-error', { message: err?.message || String(err) });
   });
 
   autoUpdater.checkForUpdates().catch(() => {});

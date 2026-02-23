@@ -47,5 +47,14 @@ contextBridge.exposeInMainWorld('snowify', {
   onUpdateAvailable: (cb) => ipcRenderer.on('update-available', (_, info) => cb(info)),
   onDownloadProgress: (cb) => ipcRenderer.on('download-progress', (_, info) => cb(info)),
   onUpdateDownloaded: (cb) => ipcRenderer.on('update-downloaded', (_, info) => cb(info)),
-  onUpdateNotAvailable: (cb) => ipcRenderer.on('update-not-available', () => cb())
+  onUpdateNotAvailable: (cb) => ipcRenderer.on('update-not-available', () => cb()),
+  onUpdateError: (cb) => ipcRenderer.on('update-error', (_, info) => cb(info)),
+  removeUpdateListeners: () => {
+    ipcRenderer.removeAllListeners('update-available');
+    ipcRenderer.removeAllListeners('update-not-available');
+    ipcRenderer.removeAllListeners('download-progress');
+    ipcRenderer.removeAllListeners('update-downloaded');
+    ipcRenderer.removeAllListeners('update-error');
+  },
+  getAppVersion: () => ipcRenderer.invoke('app:version')
 })

@@ -91,6 +91,9 @@ spotifyHandlers.register(ipcMain, deps);
 streamHandlers.register(ipcMain, deps);
 updaterHandlers.register(ipcMain, deps);
 
+// ─── App Version ───
+ipcMain.handle('app:version', () => app.getVersion());
+
 // ─── App Lifecycle ───
 app.whenReady().then(async () => {
   createWindow();

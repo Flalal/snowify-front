@@ -27,6 +27,7 @@ export function SettingsView({ onRenderHome }) {
   const [updateStatus, setUpdateStatus] = useState('idle'); // idle | checking | available | downloading | ready
   const [updateVersion, setUpdateVersion] = useState('');
   const [downloadPercent, setDownloadPercent] = useState(0);
+  const [appVersion, setAppVersion] = useState('');
 
   // Apply theme on mount + listen for update events
   useEffect(() => {
@@ -34,6 +35,8 @@ export function SettingsView({ onRenderHome }) {
     document.documentElement.classList.toggle('no-animations', !animations.value);
     document.documentElement.classList.toggle('no-effects', !effects.value);
     if (country.value) window.snowify.setCountry(country.value);
+
+    window.snowify.getAppVersion().then((v) => setAppVersion(v));
 
     window.snowify.onUpdateAvailable((info) => {
       setUpdateVersion(info.version);
@@ -48,6 +51,14 @@ export function SettingsView({ onRenderHome }) {
     window.snowify.onUpdateDownloaded(() => {
       setUpdateStatus('ready');
     });
+    window.snowify.onUpdateError((info) => {
+      setUpdateStatus('available');
+      showToast('Update error: ' + info.message);
+    });
+
+    return () => {
+      window.snowify.removeUpdateListeners();
+    };
   }, []);
 
   // ── Settings change handlers ──
@@ -153,9 +164,9 @@ export function SettingsView({ onRenderHome }) {
     setDownloadPercent(0);
     try {
       await window.snowify.downloadUpdate();
-    } catch {
+    } catch (err) {
       setUpdateStatus('available');
-      showToast('Download failed');
+      showToast('Download failed: ' + (err?.message || 'unknown error'));
     }
   }
 
@@ -177,7 +188,7 @@ export function SettingsView({ onRenderHome }) {
         <h2>Updates</h2>
         <div className="settings-row">
           <label>Current version</label>
-          <span>Snowify v1.1.0</span>
+          <span>Snowify {appVersion ? `v${appVersion}` : '...'}</span>
         </div>
         <div className="settings-row">
           {updateStatus === 'idle' && (
