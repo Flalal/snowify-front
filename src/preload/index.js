@@ -57,5 +57,6 @@ contextBridge.exposeInMainWorld('snowify', {
     ipcRenderer.removeAllListeners('update-downloaded');
     ipcRenderer.removeAllListeners('update-error');
   },
-  getAppVersion: () => ipcRenderer.invoke('app:version')
+  getAppVersion: () => ipcRenderer.invoke('app:version'),
+  onYtMusicInitError: (cb) => ipcRenderer.on('ytmusic-init-error', () => cb())
 })

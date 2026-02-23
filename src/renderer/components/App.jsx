@@ -77,6 +77,9 @@ export function App() {
     document.documentElement.classList.toggle('no-animations', !animations.value);
     document.documentElement.classList.toggle('no-effects', !effects.value);
     if (country.value) window.snowify.setCountry(country.value);
+    window.snowify.onYtMusicInitError?.(() => {
+      showToast('Music service failed to initialize — restart the app');
+    });
     setInitialized(true);
 
     const flushState = () => saveStateNow();

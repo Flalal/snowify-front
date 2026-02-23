@@ -69,7 +69,7 @@ export function saveState() {
   _saveTimer = setTimeout(() => {
     _saveTimer = null;
     _writeState();
-  }, 1000);
+  }, 300);
 }
 
 export function saveStateNow() {
@@ -117,5 +117,7 @@ export function loadState() {
       discordRpc.value = saved.discordRpc ?? false;
       country.value = saved.country || '';
     }
-  } catch (_) {}
+  } catch (err) {
+    console.error('Failed to load state:', err);
+  }
 }
