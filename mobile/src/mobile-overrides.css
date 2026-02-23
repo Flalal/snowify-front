@@ -1,0 +1,204 @@
+/* ─── Mobile-specific CSS overrides ─── */
+
+/* Hide desktop-only elements */
+.titlebar {
+  display: none !important;
+}
+
+/* Safe area insets for notched phones */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+body {
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bottom);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+}
+
+/* Touch targets: minimum 44px */
+button,
+.btn-secondary,
+.sidebar-item,
+.nav-item,
+input[type="checkbox"],
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* ─── Bottom Navigation (replaces sidebar) ─── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    top: auto;
+    width: 100% !important;
+    height: 64px;
+    flex-direction: row;
+    justify-content: space-around;
+    align-items: center;
+    padding: 0;
+    padding-bottom: var(--safe-bottom);
+    z-index: 100;
+    border-top: 1px solid var(--border);
+    border-right: none;
+    overflow: hidden;
+  }
+
+  .sidebar .sidebar-logo,
+  .sidebar .sidebar-section-title,
+  .sidebar .sidebar-playlists,
+  .sidebar .sidebar-bottom {
+    display: none !important;
+  }
+
+  .sidebar .sidebar-nav {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    justify-content: space-around;
+    padding: 0;
+    gap: 0;
+  }
+
+  .sidebar .sidebar-item {
+    flex-direction: column;
+    font-size: 10px;
+    padding: 6px 4px;
+    gap: 2px;
+    flex: 1;
+    text-align: center;
+  }
+
+  .sidebar .sidebar-item svg {
+    width: 22px;
+    height: 22px;
+  }
+
+  /* Main content adjustments */
+  .main-content {
+    margin-left: 0 !important;
+    padding-bottom: calc(64px + 70px + var(--safe-bottom)) !important;
+  }
+
+  /* Now Playing Bar */
+  .now-playing-bar {
+    bottom: calc(64px + var(--safe-bottom));
+    left: 0;
+    right: 0;
+    border-radius: 0;
+  }
+
+  .now-playing-bar .track-info {
+    max-width: 50%;
+  }
+
+  .now-playing-bar .player-controls {
+    gap: 8px;
+  }
+
+  .now-playing-bar .volume-control {
+    display: none !important;
+  }
+
+  /* Settings inputs */
+  .settings-input {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  .settings-row {
+    flex-wrap: wrap;
+  }
+
+  /* Search bar */
+  .search-bar {
+    width: 100% !important;
+  }
+
+  /* Grid layouts: 2 columns on mobile */
+  .card-grid,
+  .album-grid,
+  .artist-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+
+  /* Track list: more compact */
+  .track-row {
+    padding: 8px 12px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+  .card-grid,
+  .album-grid,
+  .artist-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ─── Login screen (mobile-only) ─── */
+.mobile-login {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  padding: 24px;
+  gap: 16px;
+}
+
+.mobile-login h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.mobile-login input {
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 16px;
+}
+
+.mobile-login button {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.mobile-login .btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+}
+
+.mobile-login .btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+}
+
+.mobile-login .error {
+  color: var(--red);
+  font-size: 13px;
+}

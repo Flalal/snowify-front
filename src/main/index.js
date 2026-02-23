@@ -18,6 +18,7 @@ import * as shellHandlers from './ipc/shell.handlers.js';
 import * as spotifyHandlers from './ipc/spotify.handlers.js';
 import * as streamHandlers from './ipc/stream.handlers.js';
 import * as updaterHandlers from './ipc/updater.handlers.js';
+import * as authHandlers from './ipc/auth.handlers.js';
 
 // ─── Auto-Update ───
 import { initUpdater } from './services/updater.js';
@@ -90,6 +91,7 @@ shellHandlers.register(ipcMain, deps);
 spotifyHandlers.register(ipcMain, deps);
 streamHandlers.register(ipcMain, deps);
 updaterHandlers.register(ipcMain, deps);
+authHandlers.register(ipcMain, deps);
 
 // ─── App Version ───
 ipcMain.handle('app:version', () => app.getVersion());

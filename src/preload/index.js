@@ -58,5 +58,16 @@ contextBridge.exposeInMainWorld('snowify', {
     ipcRenderer.removeAllListeners('update-error');
   },
   getAppVersion: () => ipcRenderer.invoke('app:version'),
-  onYtMusicInitError: (cb) => ipcRenderer.on('ytmusic-init-error', () => cb())
+  onYtMusicInitError: (cb) => ipcRenderer.on('ytmusic-init-error', () => cb()),
+
+  // Cloud Sync & Auth
+  authConfigure: (config) => ipcRenderer.invoke('auth:configure', config),
+  authLogin: (email, password) => ipcRenderer.invoke('auth:login', email, password),
+  authRegister: (username, email, password) => ipcRenderer.invoke('auth:register', username, email, password),
+  authLogout: () => ipcRenderer.invoke('auth:logout'),
+  authGetState: () => ipcRenderer.invoke('auth:getState'),
+  syncPush: (localState) => ipcRenderer.invoke('sync:push', localState),
+  syncPull: () => ipcRenderer.invoke('sync:pull'),
+  syncMerge: (local, remote) => ipcRenderer.invoke('sync:merge', local, remote),
+  onTokensUpdated: (cb) => ipcRenderer.on('auth:tokens-updated', (_, tokens) => cb(tokens)),
 })

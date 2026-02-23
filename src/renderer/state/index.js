@@ -19,6 +19,14 @@ export const theme = signal('dark');
 export const discordRpc = signal(false);
 export const country = signal('');
 
+// ─── Cloud Sync signals (persisted) ───
+export const cloudSyncEnabled = signal(false);
+export const cloudApiUrl = signal('');
+export const cloudUser = signal(null);  // { id, username, email } or null
+export const cloudAccessToken = signal('');
+export const cloudRefreshToken = signal('');
+export const lastSyncAt = signal('');
+
 // ─── Transient signals (not persisted) ───
 export const pendingRadioNav = signal(null);
 export const currentView = signal('home');
@@ -50,7 +58,9 @@ const PERSISTENT_KEYS = {
   playlists, likedSongs, recentTracks, followedArtists,
   volume, shuffle, repeat, musicOnly, autoplay,
   audioQuality, videoQuality, videoPremuxed,
-  animations, effects, theme, discordRpc, country
+  animations, effects, theme, discordRpc, country,
+  cloudSyncEnabled, cloudApiUrl, cloudUser,
+  cloudAccessToken, cloudRefreshToken, lastSyncAt
 };
 
 function _writeState() {
@@ -116,6 +126,12 @@ export function loadState() {
       theme.value = saved.theme || 'dark';
       discordRpc.value = saved.discordRpc ?? false;
       country.value = saved.country || '';
+      cloudSyncEnabled.value = saved.cloudSyncEnabled ?? false;
+      cloudApiUrl.value = saved.cloudApiUrl || '';
+      cloudUser.value = saved.cloudUser || null;
+      cloudAccessToken.value = saved.cloudAccessToken || '';
+      cloudRefreshToken.value = saved.cloudRefreshToken || '';
+      lastSyncAt.value = saved.lastSyncAt || '';
     }
   } catch (err) {
     console.error('Failed to load state:', err);
