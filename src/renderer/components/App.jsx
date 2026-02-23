@@ -18,6 +18,7 @@ import { QueuePanel } from './overlays/QueuePanel.jsx';
 import { showToast } from './shared/Toast.jsx';
 import { Toast } from './shared/Toast.jsx';
 import { InputModal } from './shared/InputModal.jsx';
+import { PlaylistPickerModal } from './shared/PlaylistPickerModal.jsx';
 import { Spinner } from './shared/Spinner.jsx';
 
 // ─── Lazy-loaded views & overlays ───
@@ -625,6 +626,7 @@ export function App() {
 
       <Toast />
       <InputModal />
+      <PlaylistPickerModal />
     </>
   );
 }

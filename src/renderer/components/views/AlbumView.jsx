@@ -2,6 +2,7 @@ import { useState, useEffect } from 'preact/hooks';
 import { TrackList } from '../shared/TrackList.jsx';
 import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
+import { showPlaylistPicker } from '../shared/PlaylistPickerModal.jsx';
 
 /**
  * AlbumView - Album detail page with hero header and track list.
@@ -134,6 +135,12 @@ export function AlbumView({
               <line x1="4" y1="4" x2="9" y2="9" />
             </svg>
             Shuffle
+          </button>
+          <button className="btn-secondary" onClick={() => showPlaylistPicker(album.tracks)}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Add to Playlist
           </button>
         </div>
       )}

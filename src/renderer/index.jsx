@@ -19,6 +19,7 @@ import './styles/explore.css';
 import './styles/settings.css';
 import './styles/library.css';
 import './styles/modal.css';
+import './styles/playlist-picker.css';
 import './styles/spotify.css';
 import './styles/lyrics.css';
 import './styles/video.css';

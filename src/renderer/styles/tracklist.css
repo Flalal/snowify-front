@@ -6,7 +6,7 @@
 
 .track-list-header {
   display: grid;
-  grid-template-columns: 40px 1fr 1fr 32px;
+  grid-template-columns: 40px 1fr 1fr 32px 32px;
   gap: 16px;
   padding: 0 16px 8px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
@@ -22,7 +22,7 @@
 
 .track-row {
   display: grid;
-  grid-template-columns: 40px 1fr 1fr 32px;
+  grid-template-columns: 40px 1fr 1fr 32px 32px;
   gap: 16px;
   padding: 8px 16px;
   border-radius: var(--radius);
@@ -93,7 +93,7 @@
 /* ── Plays column ── */
 .track-list-header.has-plays,
 .track-row.has-plays {
-  grid-template-columns: 40px 1fr 1fr 32px auto;
+  grid-template-columns: 40px 1fr 1fr 32px 32px auto;
 }
 .track-plays {
   font-size: 12px;
@@ -126,6 +126,28 @@
 .track-like-btn.liked svg {
   fill: var(--accent);
   stroke: var(--accent);
+}
+
+.track-add-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.track-add-btn {
+  opacity: 0;
+  transition: opacity var(--transition), transform 0.15s ease;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-subdued);
+  cursor: pointer;
+}
+.track-row:hover .track-add-btn {
+  opacity: 1;
+}
+.track-add-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.2);
 }
 
 .track-row-actions {

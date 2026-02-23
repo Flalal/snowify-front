@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'preact/hooks';
 import { queue, queueIndex, isPlaying, likedSongs } from '../../state/index.js';
 import { TrackRow } from './TrackRow.jsx';
+import { showPlaylistPicker } from './PlaylistPickerModal.jsx';
 
 const ROW_HEIGHT = 56;
 const OVERSCAN = 10;
@@ -24,11 +25,16 @@ export function TrackList({ tracks, context, onPlay, onLike, onContextMenu, onDr
     if (onPlay) onPlay(tracks, index);
   }
 
+  function handleAddToPlaylist(track) {
+    showPlaylistPicker([track]);
+  }
+
   const header = (
     <div className={`track-list-header${modifier}`}>
       <span>#</span>
       <span>Title</span>
       <span>Artist</span>
+      <span></span>
       <span></span>
       {showPlays && <span style={{ textAlign: 'right' }}>Plays</span>}
     </div>
@@ -50,6 +56,7 @@ export function TrackList({ tracks, context, onPlay, onLike, onContextMenu, onDr
             showPlays={showPlays}
             onPlay={handlePlay}
             onLike={onLike}
+            onAddToPlaylist={handleAddToPlaylist}
             onContextMenu={onContextMenu}
             onDragStart={onDragStart}
           />
@@ -71,6 +78,7 @@ export function TrackList({ tracks, context, onPlay, onLike, onContextMenu, onDr
       header={header}
       onPlay={handlePlay}
       onLike={onLike}
+      onAddToPlaylist={handleAddToPlaylist}
       onContextMenu={onContextMenu}
       onDragStart={onDragStart}
     />
@@ -79,7 +87,7 @@ export function TrackList({ tracks, context, onPlay, onLike, onContextMenu, onDr
 
 function VirtualTrackList({
   tracks, context, showPlays, currentTrack, playing, likedSet,
-  header, onPlay, onLike, onContextMenu, onDragStart
+  header, onPlay, onLike, onAddToPlaylist, onContextMenu, onDragStart
 }) {
   const containerRef = useRef(null);
   const [range, setRange] = useState({ start: 0, end: 40 });
@@ -152,6 +160,7 @@ function VirtualTrackList({
                 showPlays={showPlays}
                 onPlay={onPlay}
                 onLike={onLike}
+                onAddToPlaylist={onAddToPlaylist}
                 onContextMenu={onContextMenu}
                 onDragStart={onDragStart}
               />

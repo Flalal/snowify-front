@@ -1,0 +1,85 @@
+/* ═══════ Playlist Picker Modal ═══════ */
+.picker-box {
+  min-width: 300px;
+  max-width: 380px;
+}
+.picker-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 300px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+.picker-list::-webkit-scrollbar { width: 6px; }
+.picker-list::-webkit-scrollbar-track { background: transparent; }
+.picker-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.picker-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-family: var(--font);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--transition);
+  text-align: left;
+  width: 100%;
+}
+.picker-item:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+.picker-item svg {
+  flex-shrink: 0;
+  color: var(--text-subdued);
+}
+.picker-item span:first-of-type {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.picker-count {
+  font-size: 12px;
+  color: var(--text-subdued);
+  flex-shrink: 0;
+}
+
+.picker-new {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition);
+  width: 100%;
+  margin-bottom: 8px;
+}
+.picker-new:hover {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .picker-item:hover { background: rgba(0, 0, 0, 0.04); }
+[data-theme="light"] .picker-new { border-color: rgba(0, 0, 0, 0.1); }
+[data-theme="light"] .picker-new:hover { background: rgba(0, 0, 0, 0.04); border-color: rgba(0, 0, 0, 0.2); }
+[data-theme="light"] .picker-list::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.15); }

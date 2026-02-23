@@ -7,6 +7,7 @@ import { ArtistCard } from '../shared/ArtistCard.jsx';
 import { ScrollContainer } from '../shared/ScrollContainer.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
 import { showToast } from '../shared/Toast.jsx';
+import { showPlaylistPicker } from '../shared/PlaylistPickerModal.jsx';
 import { HomeView } from './HomeView.jsx';
 
 /**
@@ -209,6 +210,12 @@ export function ArtistView({
             <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
           </svg>
           Share
+        </button>
+        <button className="btn-secondary" onClick={() => showPlaylistPicker(popular)}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add to Playlist
         </button>
       </div>
 
