@@ -1,0 +1,101 @@
+/* ═══════ Playlist Detail ═══════ */
+.playlist-header {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding-bottom: 24px;
+  margin-bottom: 8px;
+}
+.playlist-hero-cover {
+  width: 200px;
+  height: 200px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.45);
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.playlist-hero-cover:hover {
+  transform: scale(1.02);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.5);
+}
+.playlist-hero-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.playlist-hero-cover .playlist-cover-grid {
+  width: 100%;
+  height: 100%;
+}
+.playlist-hero-cover .playlist-cover-grid img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.playlist-hero-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.playlist-type {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+.playlist-hero-name {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.playlist-hero-count {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.playlist-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0;
+}
+.play-all-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-bounce), background var(--transition), box-shadow var(--transition);
+  box-shadow: 0 4px 20px var(--accent-glow);
+}
+.play-all-btn:hover {
+  transform: scale(1.08);
+  background: var(--accent-hover);
+  box-shadow: 0 8px 30px var(--accent-glow);
+}
+
+/* ═══════ Playlist action buttons ═══════ */
+.playlist-actions-spacer { flex: 1; }
+.playlist-action-btn {
+  width: 36px;
+  height: 36px;
+  color: var(--text-secondary);
+  transition: color var(--transition), transform var(--transition-bounce);
+}
+.playlist-action-btn:hover { color: var(--text-primary); transform: scale(1.15); }
+.playlist-action-btn.btn-delete:hover { color: var(--red); }

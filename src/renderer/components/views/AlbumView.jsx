@@ -1,0 +1,160 @@
+import { useState, useEffect } from 'preact/hooks';
+import { TrackList } from '../shared/TrackList.jsx';
+import { ArtistLink } from '../shared/ArtistLink.jsx';
+import { Spinner } from '../shared/Spinner.jsx';
+
+/**
+ * AlbumView - Album detail page with hero header and track list.
+ *
+ * Props:
+ *   albumId        - the album browse ID
+ *   albumMeta      - optional meta object { name, thumbnail, year, type }
+ *   onPlayFromList - callback(tracks, index)
+ *   onLike         - callback(track, buttonEl)
+ *   onContextMenu  - callback(e, track)
+ *   onDragStart    - callback(e, track)
+ */
+export function AlbumView({
+  albumId,
+  albumMeta,
+  onPlayFromList,
+  onLike,
+  onContextMenu,
+  onDragStart
+}) {
+  const [album, setAlbum] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function fetchAlbum() {
+      setLoading(true);
+      setError(false);
+
+      try {
+        const result = await window.snowify.albumTracks(albumId);
+
+        if (cancelled) return;
+
+        if (!result || !result.tracks.length) {
+          setError(true);
+          setLoading(false);
+          return;
+        }
+
+        setAlbum(result);
+      } catch (err) {
+        console.error('Album load error:', err);
+        if (!cancelled) setError(true);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    }
+
+    if (albumId) fetchAlbum();
+    return () => { cancelled = true; };
+  }, [albumId]);
+
+  function handlePlayAll() {
+    if (album && album.tracks.length && onPlayFromList) {
+      onPlayFromList(album.tracks, 0);
+    }
+  }
+
+  function handleShuffle() {
+    if (album && album.tracks.length && onPlayFromList) {
+      const shuffled = [...album.tracks].sort(() => Math.random() - 0.5);
+      onPlayFromList(shuffled, 0);
+    }
+  }
+
+  function handlePlay(tracks, index) {
+    if (onPlayFromList) onPlayFromList(tracks, index);
+  }
+
+  // Derive display values
+  const displayName = album?.name || albumMeta?.name || 'Loading...';
+  const displayThumbnail = album?.thumbnail || albumMeta?.thumbnail || '';
+  const displayType = ((albumMeta?.type || 'ALBUM')).toUpperCase();
+
+  // Build meta line parts
+  const metaParts = [];
+  if (album) {
+    if (album.artist) {
+      // Artist link will be rendered separately
+    }
+    if (albumMeta?.year) metaParts.push(String(albumMeta.year));
+    if (album.tracks) {
+      metaParts.push(`${album.tracks.length} song${album.tracks.length !== 1 ? 's' : ''}`);
+    }
+  }
+
+  return (
+    <div>
+      {/* Hero header */}
+      <div className="album-hero">
+        <img
+          id="album-hero-img"
+          className="album-hero-img"
+          src={displayThumbnail}
+          alt=""
+        />
+        <div className="album-hero-info">
+          <div id="album-hero-type" className="album-hero-type">{displayType}</div>
+          <h1 id="album-hero-name">{displayName}</h1>
+          <p id="album-hero-meta">
+            {album && album.artist && (
+              <>
+                <ArtistLink track={album} />
+                {metaParts.length > 0 && (' \u00B7 ' + metaParts.join(' \u00B7 '))}
+              </>
+            )}
+            {album && !album.artist && metaParts.join(' \u00B7 ')}
+          </p>
+        </div>
+      </div>
+
+      {/* Action buttons */}
+      {album && album.tracks.length > 0 && (
+        <div className="album-actions">
+          <button id="btn-album-play-all" className="btn-primary" onClick={handlePlayAll}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M8 5v14l11-7L8 5z" />
+            </svg>
+            Play All
+          </button>
+          <button id="btn-album-shuffle" className="btn-secondary" onClick={handleShuffle}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="16 3 21 3 21 8" />
+              <line x1="4" y1="20" x2="21" y2="3" />
+              <polyline points="21 16 21 21 16 21" />
+              <line x1="15" y1="15" x2="21" y2="21" />
+              <line x1="4" y1="4" x2="9" y2="9" />
+            </svg>
+            Shuffle
+          </button>
+        </div>
+      )}
+
+      {/* Track list or loading/error */}
+      <div id="album-tracks">
+        {loading && <Spinner />}
+        {error && !loading && (
+          <div className="empty-state"><p>Could not load album tracks.</p></div>
+        )}
+        {!loading && !error && album && album.tracks.length > 0 && (
+          <TrackList
+            tracks={album.tracks}
+            context="album"
+            onPlay={handlePlay}
+            onLike={onLike}
+            onContextMenu={onContextMenu}
+            onDragStart={onDragStart}
+          />
+        )}
+      </div>
+    </div>
+  );
+}

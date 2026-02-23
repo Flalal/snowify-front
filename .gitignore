@@ -1,0 +1,9 @@
+node_modules/
+dist/
+out/
+bin/
+.DS_Store
+*.log
+copilot-instructions.md
+.idea/
+.vscode/

@@ -1,0 +1,279 @@
+/* ═══════ Artist Page ═══════ */
+.artist-banner {
+  position: relative;
+  width: calc(100% + 64px);
+  margin-left: -32px;
+  margin-top: -24px;
+  height: 280px;
+  overflow: hidden;
+  margin-bottom: -60px;
+}
+.artist-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+  display: block;
+}
+.artist-banner-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120px;
+  background: linear-gradient(to bottom, transparent, var(--bg-surface));
+  pointer-events: none;
+}
+
+.artist-header {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  padding: 8px 8px 0;
+}
+
+.artist-avatar {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  background: var(--bg-elevated);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: transform var(--transition), box-shadow var(--transition), opacity 0.3s ease;
+}
+.artist-avatar:hover {
+  transform: scale(1.03);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+}
+
+.artist-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 8px;
+}
+
+.artist-verified {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--accent);
+}
+
+.artist-name {
+  font-size: 56px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.artist-followers {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.artist-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 8px 8px;
+}
+.follow-btn {
+  padding: 6px 24px;
+  border-radius: 500px;
+  border: 1px solid var(--text-subdued);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), transform 0.15s;
+  letter-spacing: 0.02em;
+}
+.follow-btn:hover {
+  border-color: var(--text-primary);
+  transform: scale(1.03);
+}
+.follow-btn.following {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.follow-btn.following:hover {
+  border-color: var(--text-subdued);
+  color: var(--text-subdued);
+}
+#btn-artist-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+}
+
+.artist-section {
+  padding: 16px 0;
+}
+.artist-section h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  padding: 0 8px;
+}
+
+.artist-description {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  max-width: 680px;
+  padding: 0 8px;
+  white-space: pre-wrap;
+}
+
+.artist-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 12px 8px 0;
+}
+.artist-tag {
+  padding: 5px 14px;
+  border-radius: 500px;
+  background: var(--accent-dim);
+  border: 1px solid var(--accent-dim);
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  transition: background var(--transition);
+}
+.artist-tag:hover {
+  background: var(--accent-dim-hover);
+}
+
+/* Show more/less button */
+.show-more-btn {
+  display: inline-block;
+  padding: 8px 16px;
+  margin: 12px 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 500px;
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.show-more-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.02);
+}
+
+/* ═══════ Discography Filter Pills ═══════ */
+.disco-filters {
+  display: flex;
+  gap: 8px;
+  padding: 0 8px 12px;
+}
+.disco-filter {
+  padding: 7px 16px;
+  border-radius: 500px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.disco-filter:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  color: var(--text-primary);
+}
+.disco-filter.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+  box-shadow: 0 2px 12px var(--accent-glow);
+}
+
+/* ═══════ Similar Artists / Fans might also like ═══════ */
+.similar-artists-scroll {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 4px 8px 16px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+.similar-artists-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.similar-artists-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.similar-artists-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+}
+.similar-artists-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.similar-artist-card {
+  flex: 0 0 140px;
+  width: 140px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 8px;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+.similar-artist-card:hover {
+  background: var(--bg-elevated);
+  transform: translateY(-3px);
+}
+
+.similar-artist-avatar {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--bg-elevated);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  transition: box-shadow var(--transition);
+}
+.similar-artist-card:hover .similar-artist-avatar {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+.similar-artist-name {
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+  color: var(--text-primary);
+}
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .disco-filter { border-color: rgba(0, 0, 0, 0.12); color: var(--text-secondary); }
+[data-theme="light"] .disco-filter:hover { border-color: var(--text-secondary); color: var(--text-primary); }
+[data-theme="light"] .disco-filter.active { border-color: var(--accent); }

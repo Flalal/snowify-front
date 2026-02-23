@@ -1,0 +1,141 @@
+/* ═══════ Track List ═══════ */
+.track-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.track-list-header {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 32px;
+  gap: 16px;
+  padding: 0 16px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  margin-bottom: 4px;
+}
+.track-list-header span {
+  font-size: 11px;
+  color: var(--text-subdued);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 600;
+}
+
+.track-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr 32px;
+  gap: 16px;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  align-items: center;
+  cursor: pointer;
+  transition: background var(--transition), transform var(--transition);
+}
+.track-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateX(2px);
+}
+.track-row.playing { background: var(--accent-dim); }
+
+.track-num {
+  font-size: 14px;
+  color: var(--text-subdued);
+  text-align: center;
+  position: relative;
+}
+.track-row:hover .track-num-text { display: none; }
+.track-row:hover .track-num-play { display: flex !important; }
+.track-num-play {
+  display: none !important;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.track-row.playing .track-num-text { color: var(--accent); }
+
+.track-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+.track-thumb {
+  width: 40px;
+  height: 40px;
+  border-radius: 6px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--bg-highlight);
+  transition: transform var(--transition);
+}
+.track-row:hover .track-thumb {
+  transform: scale(1.05);
+}
+.track-details {
+  overflow: hidden;
+}
+.track-title {
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.track-row.playing .track-title { color: var(--accent); }
+
+.track-artist-col {
+  font-size: 13px;
+  color: var(--text-subdued);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Plays column ── */
+.track-list-header.has-plays,
+.track-row.has-plays {
+  grid-template-columns: 40px 1fr 1fr 32px auto;
+}
+.track-plays {
+  font-size: 12px;
+  color: var(--text-subdued);
+  text-align: right;
+  white-space: nowrap;
+}
+.track-like-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.track-like-btn {
+  opacity: 0;
+  transition: opacity var(--transition), transform 0.15s ease;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-subdued);
+  cursor: pointer;
+}
+.track-row:hover .track-like-btn,
+.track-like-btn.liked {
+  opacity: 1;
+}
+.track-like-btn:hover {
+  color: var(--text-primary);
+  transform: scale(1.2);
+}
+.track-like-btn.liked svg {
+  fill: var(--accent);
+  stroke: var(--accent);
+}
+
+.track-row-actions {
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+.track-row:hover .track-row-actions { opacity: 1; }
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .track-row:hover { background: rgba(0, 0, 0, 0.04); }
+[data-theme="light"] .track-row.playing { background: rgba(0, 0, 0, 0.06); }

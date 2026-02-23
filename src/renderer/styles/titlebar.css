@@ -1,0 +1,59 @@
+/* ═══════ Title Bar ═══════ */
+#titlebar {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--titlebar-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-surface);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  z-index: 1000;
+  -webkit-app-region: drag;
+}
+
+.titlebar-drag {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding-left: 16px;
+  height: 100%;
+}
+
+.app-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text-primary);
+  letter-spacing: 0.5px;
+}
+.app-logo-icon {
+  pointer-events: none;
+}
+
+.titlebar-controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.tb-btn {
+  width: 46px;
+  height: var(--titlebar-height);
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), color var(--transition);
+}
+.tb-btn:hover { background: rgba(255, 255, 255, 0.08); color: #fff; }
+.tb-close:hover { background: #e81123; color: #fff; }
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] #titlebar { border-bottom-color: rgba(0, 0, 0, 0.08); }
+[data-theme="light"] .tb-btn:hover { background: rgba(0, 0, 0, 0.06); color: var(--text-primary); }
+[data-theme="light"] .tb-close:hover { background: #e81123; color: #fff; }

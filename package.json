@@ -1,0 +1,78 @@
+{
+  "name": "snowify",
+  "version": "1.0.3",
+  "description": "A Spotify-like desktop music player that streams from free sources",
+  "main": "./out/main/index.js",
+  "scripts": {
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "build:linux": "electron-vite build && electron-builder --linux",
+    "build:win": "electron-vite build && electron-builder --win",
+    "build:all": "electron-vite build && electron-builder --linux --win"
+  },
+  "keywords": [
+    "music",
+    "player",
+    "electron",
+    "youtube",
+    "streaming"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@preact/preset-vite": "^2.10.3",
+    "electron": "^33.0.0",
+    "electron-builder": "^26.7.0",
+    "electron-vite": "^5.0.0"
+  },
+  "dependencies": {
+    "@preact/signals": "^2.8.1",
+    "@stef-0012/synclyrics": "^2.5.10",
+    "@xhayper/discord-rpc": "^1.3.0",
+    "preact": "^10.28.4",
+    "ytmusic-api": "^5.3.1"
+  },
+  "build": {
+    "appId": "com.nyaku.snowify",
+    "productName": "Snowify",
+    "icon": "assets/logo.png",
+    "asar": true,
+    "compression": "maximum",
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Audio",
+      "icon": "assets/logo.png",
+      "extraResources": [
+        {
+          "from": "bin/linux",
+          "to": "bin/linux",
+          "filter": [
+            "yt-dlp"
+          ]
+        }
+      ]
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "assets/logo.ico",
+      "extraResources": [
+        {
+          "from": "bin/win",
+          "to": "bin/win",
+          "filter": [
+            "yt-dlp.exe"
+          ]
+        }
+      ]
+    },
+    "files": [
+      "out/**/*",
+      "assets/**/*"
+    ]
+  }
+}
