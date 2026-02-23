@@ -94,6 +94,13 @@ updaterHandlers.register(ipcMain, deps);
 // ─── App Version ───
 ipcMain.handle('app:version', () => app.getVersion());
 
+// ─── GPU cache fix (Windows permission errors) ───
+if (process.env.ELECTRON_RENDERER_URL) {
+  app.commandLine.appendSwitch('disable-gpu-shader-disk-cache');
+} else {
+  app.commandLine.appendSwitch('disk-cache-dir', path.join(app.getPath('userData'), 'cache'));
+}
+
 // ─── App Lifecycle ───
 app.whenReady().then(async () => {
   createWindow();

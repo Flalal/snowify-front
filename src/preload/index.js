@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('snowify', {
   explore: () => ipcRenderer.invoke('yt:explore'),
   charts: () => ipcRenderer.invoke('yt:charts'),
   browseMood: (browseId, params) => ipcRenderer.invoke('yt:browseMood', browseId, params),
+  getPlaylistVideos: (browseId) => ipcRenderer.invoke('yt:getPlaylistVideos', browseId),
   setCountry: (code) => ipcRenderer.invoke('yt:setCountry', code),
   getLyrics: (trackName, artistName, albumName, duration) =>
     ipcRenderer.invoke('lyrics:get', trackName, artistName, albumName, duration),
