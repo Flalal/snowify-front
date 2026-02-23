@@ -177,7 +177,7 @@ export function SettingsView({ onRenderHome }) {
         <h2>Updates</h2>
         <div className="settings-row">
           <label>Current version</label>
-          <span>Snowify v1.0.4</span>
+          <span>Snowify v1.1.0</span>
         </div>
         <div className="settings-row">
           {updateStatus === 'idle' && (
