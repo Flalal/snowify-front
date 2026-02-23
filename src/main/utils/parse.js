@@ -57,6 +57,28 @@ export function mapSongToTrack(song, artists) {
   };
 }
 
+/**
+ * Extract artist map from raw musicShelf contents (search results / artist top songs).
+ * Returns { [videoId]: [{ name, id }] }
+ */
+export function extractArtistMap(shelfContents) {
+  const map = {};
+  for (const entry of shelfContents) {
+    const r = entry?.musicResponsiveListItemRenderer;
+    if (!r) continue;
+    const cols = r.flexColumns || [];
+    const videoId = cols[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]
+      ?.navigationEndpoint?.watchEndpoint?.videoId;
+    if (!videoId) continue;
+    const allRuns = cols[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
+    const dotIdx = allRuns.findIndex(run => run.text === ' \u2022 ');
+    const artistRuns = dotIdx >= 0 ? allRuns.slice(0, dotIdx) : allRuns;
+    const artists = parseArtistsFromRuns(artistRuns);
+    if (artists.length) map[videoId] = artists;
+  }
+  return map;
+}
+
 export function parseCsvLine(line) {
   const fields = [];
   let current = '';

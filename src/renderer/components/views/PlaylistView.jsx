@@ -4,6 +4,7 @@ import { TrackList } from '../shared/TrackList.jsx';
 import { showToast } from '../shared/Toast.jsx';
 import { showInputModal } from '../shared/InputModal.jsx';
 import { showContextMenu } from '../shared/ContextMenu.jsx';
+import { shuffleArray } from '../../utils/shuffleArray.js';
 
 /**
  * PlaylistView - Detail view for a playlist (liked songs or custom).
@@ -38,12 +39,7 @@ export function PlaylistView({
 
   function handleShuffle() {
     if (tracks.length && onPlayFromList) {
-      const shuffled = [...tracks];
-      for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-      }
-      onPlayFromList(shuffled, 0);
+      onPlayFromList(shuffleArray([...tracks]), 0);
     }
   }
 

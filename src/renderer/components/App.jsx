@@ -23,6 +23,7 @@ import { PlaylistContextMenu } from './shared/PlaylistContextMenu.jsx';
 import { InputModal } from './shared/InputModal.jsx';
 import { PlaylistPickerModal } from './shared/PlaylistPickerModal.jsx';
 import { Spinner } from './shared/Spinner.jsx';
+import { shuffleArray } from '../utils/shuffleArray.js';
 
 // ─── Lazy-loaded views & overlays ───
 const ExploreView = lazy(() => import('./views/ExploreView.jsx').then(m => ({ default: m.ExploreView })));
@@ -40,6 +41,9 @@ const albumViewState = signal(null); // { albumId, albumMeta }
 const artistViewState = signal(null); // { artistId }
 const playlistViewState = signal(null); // { playlist, isLiked }
 const videoPlayerState = signal(null); // { videoId, title, artist }
+
+// Cap actual audio volume at 30% to prevent distortion at max slider
+const VOLUME_SCALE = 0.3;
 
 function applyThemeToDOM(themeName) {
   if (themeName === 'dark') {
@@ -71,7 +75,7 @@ export function App() {
     loadState();
 
     const audio = getAudio();
-    if (audio) audio.volume = volume.value * 0.3;
+    if (audio) audio.volume = volume.value * VOLUME_SCALE;
     if (discordRpc.value) window.snowify.connectDiscord();
     applyThemeToDOM(theme.value);
     document.documentElement.classList.toggle('no-animations', !animations.value);
@@ -202,7 +206,7 @@ export function App() {
     try {
       const directUrl = await window.snowify.getStreamUrl(track.url, audioQuality.value);
       audio.src = directUrl;
-      audio.volume = volume.value * 0.3;
+      audio.volume = volume.value * VOLUME_SCALE;
       audio.load();
       await audio.play();
       isPlaying.value = true;
@@ -234,10 +238,7 @@ export function App() {
     if (shuffle.value) {
       const picked = tracks[index];
       const rest = tracks.filter((_, i) => i !== index);
-      for (let i = rest.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [rest[i], rest[j]] = [rest[j], rest[i]];
-      }
+      shuffleArray(rest);
       queue.value = [picked, ...rest];
       queueIndex.value = 0;
     } else {
@@ -333,10 +334,7 @@ export function App() {
         isPlaying.value = false;
         return;
       }
-      for (let i = pool.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [pool[i], pool[j]] = [pool[j], pool[i]];
-      }
+      shuffleArray(pool);
       const maxAdd = Math.min(20, 200 - queue.value.length);
       if (maxAdd <= 0) {
         const trim = Math.min(queueIndex.value, queue.value.length - 100);
@@ -369,7 +367,7 @@ export function App() {
   const setVolumeLevel = useCallback((vol) => {
     const audio = getAudio();
     volume.value = Math.max(0, Math.min(1, vol));
-    if (audio) audio.volume = volume.value * 0.3;
+    if (audio) audio.volume = volume.value * VOLUME_SCALE;
     saveState();
   }, []);
 
@@ -380,10 +378,7 @@ export function App() {
       if (shuffle.value) {
         originalQueue.value = [...queue.value];
         const rest = queue.value.filter((_, i) => i !== queueIndex.value);
-        for (let i = rest.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [rest[i], rest[j]] = [rest[j], rest[i]];
-        }
+        shuffleArray(rest);
         queue.value = [current, ...rest];
         queueIndex.value = 0;
       } else {

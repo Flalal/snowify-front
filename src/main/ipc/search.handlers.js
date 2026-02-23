@@ -1,6 +1,6 @@
 // ─── Search & Artist/Album IPC Handlers ───
 
-import { parseArtistsFromRuns, buildArtistFields, mapSongToTrack } from '../utils/parse.js';
+import { parseArtistsFromRuns, buildArtistFields, mapSongToTrack, extractArtistMap } from '../utils/parse.js';
 import { formatDuration, getBestThumbnail, getSquareThumbnail } from '../utils/format.js';
 
 export function register(ipcMain, deps) {
@@ -10,31 +10,19 @@ export function register(ipcMain, deps) {
     try {
       const ytmusic = getYtMusic();
       if (musicOnly) {
+        // Filter: music songs only, exclude videos
         const rawParams = 'EgWKAQIIAWoOEAMQBBAJEAoQBRAREBU%3D';
         const [songs, rawData] = await Promise.all([
           ytmusic.searchSongs(query),
           ytmusic.constructRequest('search', { query, params: rawParams }).catch(() => null)
         ]);
 
-        const rawArtistsMap = {};
+        let rawArtistsMap = {};
         if (rawData) {
           const shelves = rawData?.contents?.tabbedSearchResultsRenderer?.tabs?.[0]
             ?.tabRenderer?.content?.sectionListRenderer?.contents || [];
           for (const s of shelves) {
-            const entries = s?.musicShelfRenderer?.contents || [];
-            for (const entry of entries) {
-              const r = entry?.musicResponsiveListItemRenderer;
-              if (!r) continue;
-              const cols = r.flexColumns || [];
-              const videoId = cols[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]
-                ?.navigationEndpoint?.watchEndpoint?.videoId;
-              if (!videoId) continue;
-              const allRuns = cols[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
-              const dotIdx = allRuns.findIndex(run => run.text === ' \u2022 ');
-              const artistRuns = dotIdx >= 0 ? allRuns.slice(0, dotIdx) : allRuns;
-              const artists = parseArtistsFromRuns(artistRuns);
-              if (artists.length) rawArtistsMap[videoId] = artists;
-            }
+            Object.assign(rawArtistsMap, extractArtistMap(s?.musicShelfRenderer?.contents || []));
           }
         }
 
@@ -48,25 +36,12 @@ export function register(ipcMain, deps) {
           ytmusic.constructRequest('search', { query }).catch(() => null)
         ]);
 
-        const rawArtistsMap = {};
+        let rawArtistsMap = {};
         if (rawData) {
           const shelves = rawData?.contents?.tabbedSearchResultsRenderer?.tabs?.[0]
             ?.tabRenderer?.content?.sectionListRenderer?.contents || [];
           for (const s of shelves) {
-            const entries = s?.musicShelfRenderer?.contents || [];
-            for (const entry of entries) {
-              const r = entry?.musicResponsiveListItemRenderer;
-              if (!r) continue;
-              const cols = r.flexColumns || [];
-              const videoId = cols[0]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs?.[0]
-                ?.navigationEndpoint?.watchEndpoint?.videoId;
-              if (!videoId) continue;
-              const allRuns = cols[1]?.musicResponsiveListItemFlexColumnRenderer?.text?.runs || [];
-              const dotIdx = allRuns.findIndex(run => run.text === ' \u2022 ');
-              const artistRuns = dotIdx >= 0 ? allRuns.slice(0, dotIdx) : allRuns;
-              const artists = parseArtistsFromRuns(artistRuns);
-              if (artists.length) rawArtistsMap[videoId] = artists;
-            }
+            Object.assign(rawArtistsMap, extractArtistMap(s?.musicShelfRenderer?.contents || []));
           }
         }
 
@@ -102,6 +77,7 @@ export function register(ipcMain, deps) {
     try {
       const ytmusic = getYtMusic();
       // Use raw API to get subscriber/listener info alongside artist data
+      // Filter: artists only
       const rawData = await ytmusic.constructRequest('search', {
         query,
         params: 'Eg-KAQwIABAAGAAgASgAMABqChAEEAMQCRAFEAo%3D'

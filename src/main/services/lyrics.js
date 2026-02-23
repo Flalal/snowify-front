@@ -4,15 +4,22 @@ import { SyncLyrics } from '@stef-0012/synclyrics';
 
 let _mxmTokenData = null;
 
-// LRU-limited cache for lyrics (max 50 entries)
+// LRU cache for lyrics (max 50 entries)
 const _lyricsCache = new Map();
 const _lyricsCacheLimit = 50;
 const lyricsCacheProxy = {
-  get(key) { return _lyricsCache.get(key); },
+  get(key) {
+    if (!_lyricsCache.has(key)) return undefined;
+    // Promote to most-recent by re-inserting
+    const value = _lyricsCache.get(key);
+    _lyricsCache.delete(key);
+    _lyricsCache.set(key, value);
+    return value;
+  },
   set(key, value) {
+    _lyricsCache.delete(key);
     if (_lyricsCache.size >= _lyricsCacheLimit) {
-      const oldest = _lyricsCache.keys().next().value;
-      _lyricsCache.delete(oldest);
+      _lyricsCache.delete(_lyricsCache.keys().next().value);
     }
     _lyricsCache.set(key, value);
   },
