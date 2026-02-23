@@ -145,8 +145,10 @@
 
 /* ── Floating search pill ── */
 .floating-search {
-  position: sticky;
-  top: 24px;
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 100;
   width: 260px;
   height: 40px;
@@ -163,14 +165,13 @@
   overflow: hidden;
   white-space: nowrap;
   pointer-events: auto;
-  margin: 0 auto -40px;
 }
 .floating-search:hover {
   background: var(--bg-highlight);
   box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 .floating-search:active {
-  transform: scale(0.97);
+  transform: translateX(-50%) scale(0.97);
 }
 .floating-search-icon {
   flex-shrink: 0;

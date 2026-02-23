@@ -1,6 +1,6 @@
 import { signal } from '@preact/signals';
 import { useEffect, useRef } from 'preact/hooks';
-import { playlists, likedSongs, queue, queueIndex, pendingRadioNav, saveState } from '../../state/index.js';
+import { playlists, likedSongs, recentTracks, queue, queueIndex, pendingRadioNav, saveState } from '../../state/index.js';
 import { showToast } from './Toast.jsx';
 import { escapeHtml } from '../../utils/escapeHtml.js';
 
@@ -65,6 +65,7 @@ export function ContextMenu() {
   if (!visible || !track) return null;
 
   const isLiked = likedSongs.value.some(t => t.id === track.id);
+  const isRecent = recentTracks.value.some(t => t.id === track.id);
   const playlistList = playlists.value;
 
   function handleAction(action, pid) {
@@ -124,6 +125,11 @@ export function ContextMenu() {
         }
         break;
       }
+      case 'remove-from-recent':
+        recentTracks.value = recentTracks.value.filter(t => t.id !== track.id);
+        saveState();
+        showToast('Removed from Recently Played');
+        break;
       case 'share':
         if (options.onShare) {
           options.onShare(track);
@@ -212,6 +218,11 @@ export function ContextMenu() {
       </div>
       {playlistSection}
       <div className="context-menu-divider" />
+      {isRecent && (
+        <div className="context-menu-item" data-action="remove-from-recent" onClick={() => handleAction('remove-from-recent')}>
+          Remove from Recently Played
+        </div>
+      )}
       <div className="context-menu-item" data-action="share" onClick={() => handleAction('share')}>
         Copy Link
       </div>
