@@ -2,6 +2,7 @@ import { playlists, likedSongs, currentView, currentPlaylistId, saveState } from
 import { PlaylistItem } from './PlaylistItem.jsx';
 import { showInputModal } from '../shared/InputModal.jsx';
 import { showToast } from '../shared/Toast.jsx';
+import { showPlaylistContextMenu } from '../shared/PlaylistContextMenu.jsx';
 import { signal } from '@preact/signals';
 
 // Drag state shared across the app
@@ -97,13 +98,14 @@ export function Sidebar({ onNavigate, onShowPlaylist, onOpenSpotifyImport }) {
             onClick={() => handlePlaylistClick({ id: 'liked', name: 'Liked Songs', tracks: liked }, true)}
             onDrop={(e) => handleTrackDrop(e, 'liked')}
           />
-          {pls.map(pl => (
+          {pls.map((pl, index) => (
             <PlaylistItem
               key={pl.id}
               playlist={pl}
               isLiked={false}
               isActive={currentPlaylistId.value === pl.id}
               onClick={() => handlePlaylistClick(pl, false)}
+              onContextMenu={(e) => showPlaylistContextMenu(e, pl, index, pls.length)}
               onDrop={(e) => handleTrackDrop(e, pl.id)}
             />
           ))}

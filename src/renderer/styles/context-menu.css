@@ -28,6 +28,10 @@
   background: var(--accent-dim);
   transform: translateX(2px);
 }
+.context-menu-item-disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
 .context-menu-divider {
   height: 1px;
   background: rgba(255, 255, 255, 0.05);

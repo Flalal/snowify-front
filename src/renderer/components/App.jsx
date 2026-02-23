@@ -19,6 +19,7 @@ import { QueuePanel } from './overlays/QueuePanel.jsx';
 import { showToast } from './shared/Toast.jsx';
 import { Toast } from './shared/Toast.jsx';
 import { ContextMenu } from './shared/ContextMenu.jsx';
+import { PlaylistContextMenu } from './shared/PlaylistContextMenu.jsx';
 import { InputModal } from './shared/InputModal.jsx';
 import { PlaylistPickerModal } from './shared/PlaylistPickerModal.jsx';
 import { Spinner } from './shared/Spinner.jsx';
@@ -636,6 +637,7 @@ export function App() {
       </Suspense>
 
       <ContextMenu />
+      <PlaylistContextMenu />
       <Toast />
       <InputModal />
       <PlaylistPickerModal />
