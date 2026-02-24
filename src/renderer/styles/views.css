@@ -93,3 +93,7 @@
   border-radius: 50%;
   animation: spin 0.8s cubic-bezier(0.5, 0, 0.5, 1) infinite;
 }
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .spinner { border-color: rgba(0, 0, 0, 0.08); border-top-color: var(--accent); }
+[data-theme="light"] .view-error button { color: #fff; }

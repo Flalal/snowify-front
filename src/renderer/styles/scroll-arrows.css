@@ -36,3 +36,6 @@
 .scroll-arrow-right {
   right: 4px;
 }
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .scroll-arrow { box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12); border: 1px solid rgba(0, 0, 0, 0.08); }

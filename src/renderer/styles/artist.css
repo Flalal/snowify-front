@@ -271,6 +271,13 @@
 }
 
 /* ── Light-mode overrides ── */
+[data-theme="light"] .artist-avatar { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); }
+[data-theme="light"] .artist-avatar:hover { box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2); }
+[data-theme="light"] .show-more-btn { border-color: rgba(0, 0, 0, 0.12); }
 [data-theme="light"] .disco-filter { border-color: rgba(0, 0, 0, 0.12); color: var(--text-secondary); }
 [data-theme="light"] .disco-filter:hover { border-color: var(--text-secondary); color: var(--text-primary); }
 [data-theme="light"] .disco-filter.active { border-color: var(--accent); }
+[data-theme="light"] .similar-artists-scroll::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.1); }
+[data-theme="light"] .similar-artists-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.2); }
+[data-theme="light"] .similar-artist-avatar { box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+[data-theme="light"] .similar-artist-card:hover .similar-artist-avatar { box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18); }

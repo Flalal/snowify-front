@@ -214,3 +214,7 @@
 .explore-back-btn:hover {
   color: var(--text-primary);
 }
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .mood-card:hover { box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1); }
+[data-theme="light"] .top-song-play { background: rgba(0, 0, 0, 0.4); }

@@ -92,17 +92,7 @@
 
 #### HIGH
 
-- [ ] **9 CSS files missing light theme overrides**
-  - `artist.css` — disco-filter, show-more-btn, follow-btn, artist-tag, similar-artist all dark-only
-  - `explore.css` — mood-card borders, top-song-item, top-artist-card hover
-  - `library.css` — lib-card border colors
-  - `lyrics.css` — lyrics-panel background
-  - `modal.css` — modal-box elevation/shadow
-  - `playlist.css` — hero cover, action buttons
-  - `scroll-arrows.css` — arrow backgrounds/shadows
-  - `video.css` — overlay background
-  - `views.css` — view-error button
-  - Fix: add `[data-theme="light"]` overrides in each file
+- [x] **9 CSS files missing light theme overrides** — Fixed: `[data-theme="light"]` overrides added to all 9 files (artist, explore, library, lyrics, modal, playlist, scroll-arrows, video, views)
 
 - [ ] **Only 1 @media query for 3,339 lines of CSS**
   - global.css:146-150 (max-width: 1000px) is the only breakpoint
@@ -216,8 +206,8 @@
 4. ~~Add `:focus-visible` to all interactive elements~~ ✅
 5. ~~Consolidate `playlist-cover-grid` into one location~~ ✅
 
-### Phase 2 — Light theme completion
-6. Add `[data-theme="light"]` overrides to the 9 files listed above
+### Phase 2 — Light theme completion ✅ DONE
+6. ~~Add `[data-theme="light"]` overrides to the 9 files listed above~~ ✅
 7. ~~Bump `--text-subdued` contrast in all 6 themes~~ ✅ Done
 
 ### Phase 3 — Accessibility ✅ DONE

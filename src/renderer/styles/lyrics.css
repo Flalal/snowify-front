@@ -17,9 +17,10 @@
   opacity: 1;
   pointer-events: auto;
 }
-[data-theme="light"] .lyrics-panel {
-  background: var(--bg-base);
-}
+/* ── Light-mode overrides ── */
+[data-theme="light"] .lyrics-panel { background: var(--bg-base); }
+[data-theme="light"] .lyrics-line { opacity: 0.3; }
+[data-theme="light"] .lyrics-line.active { text-shadow: 0 0 20px var(--accent-glow), 0 0 40px rgba(139, 61, 199, 0.08); }
 .lyrics-header {
   display: flex;
   align-items: center;

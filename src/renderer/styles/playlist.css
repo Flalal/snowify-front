@@ -90,3 +90,7 @@
 }
 .playlist-action-btn:hover { color: var(--text-primary); transform: scale(1.15); }
 .playlist-action-btn.btn-delete:hover { color: var(--red); }
+
+/* ── Light-mode overrides ── */
+[data-theme="light"] .playlist-hero-cover { box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15); }
+[data-theme="light"] .playlist-hero-cover:hover { box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2); }
