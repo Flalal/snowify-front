@@ -1,12 +1,5 @@
 import { animations, effects, theme, saveState } from '../../../state/index.js';
-
-function applyThemeToDOM(themeName) {
-  if (themeName === 'dark') {
-    document.documentElement.removeAttribute('data-theme');
-  } else {
-    document.documentElement.setAttribute('data-theme', themeName);
-  }
-}
+import { applyThemeToDOM } from '../../../utils/applyThemeToDOM.js';
 
 export function AppearanceSection() {
   function handleThemeChange(e) {

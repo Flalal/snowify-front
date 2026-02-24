@@ -3,7 +3,7 @@ import {
   discordRpc, country, isPlaying, queue, queueIndex, saveState
 } from '../../../state/index.js';
 import { showToast } from '../../../state/ui.js';
-import { invalidateExploreCache } from '../ExploreView.jsx';
+import { invalidateExploreCache } from '../../../services/exploreCache.js';
 
 export function PlaybackSection() {
   function handleAutoplayChange(e) {

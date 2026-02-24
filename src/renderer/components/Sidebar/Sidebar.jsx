@@ -1,10 +1,6 @@
-import { playlists, likedSongs, currentView, currentPlaylistId, saveState } from '../../state/index.js';
+import { playlists, likedSongs, currentView, currentPlaylistId, draggedTrack, saveState } from '../../state/index.js';
 import { PlaylistItem } from './PlaylistItem.jsx';
 import { showInputModal, showToast, showPlaylistContextMenu } from '../../state/ui.js';
-import { signal } from '@preact/signals';
-
-// Drag state shared across the app
-export const draggedTrack = signal(null);
 
 export function Sidebar({ onNavigate, onShowPlaylist, onOpenSpotifyImport }) {
   const navItems = [

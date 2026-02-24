@@ -8,8 +8,8 @@ import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { showToast } from '../../state/ui.js';
 import { useNavigation } from '../../hooks/useNavigation.js';
 import { useAsyncData } from '../../hooks/useAsyncData.js';
-import { EXPLORE_CACHE_TTL } from '../../../shared/constants.js';
 import { api } from '../../services/api.js';
+import { fetchExploreData, fetchChartsData } from '../../services/exploreCache.js';
 
 const MOOD_COLORS = [
   '#1db954', '#e13300', '#8c67ab', '#e8115b', '#1e90ff',
@@ -24,28 +24,6 @@ const POPULAR_MOODS = new Set([
   'country', 'electronic', 'indie', 'sleep', 'energy booster',
   'commute', 'latin', 'k-pop', 'metal',
 ]);
-
-// Module-level caches
-let _exploreCache = null;
-let _chartsCache = null;
-let _exploreCacheTime = 0;
-let _chartsCacheTime = 0;
-
-async function fetchExploreData() {
-  const now = Date.now();
-  if (_exploreCache && now - _exploreCacheTime < EXPLORE_CACHE_TTL) return _exploreCache;
-  _exploreCache = await api.explore();
-  _exploreCacheTime = now;
-  return _exploreCache;
-}
-
-async function fetchChartsData() {
-  const now = Date.now();
-  if (_chartsCache && now - _chartsCacheTime < EXPLORE_CACHE_TTL) return _chartsCache;
-  _chartsCache = await api.charts();
-  _chartsCacheTime = now;
-  return _chartsCache;
-}
 
 export function ExploreView() {
   const { playFromList, showAlbumDetail, openArtistPage, openVideoPlayer, playAlbum } = useNavigation();
@@ -314,12 +292,4 @@ export function ExploreView() {
       )}
     </div>
   );
-}
-
-// Export for cache invalidation from settings
-export function invalidateExploreCache() {
-  _exploreCache = null;
-  _chartsCache = null;
-  _exploreCacheTime = 0;
-  _chartsCacheTime = 0;
 }

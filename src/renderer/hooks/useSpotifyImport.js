@@ -1,22 +1,56 @@
-import { useState, useRef, useCallback, useEffect } from 'preact/hooks';
+import { useReducer, useRef, useCallback, useEffect } from 'preact/hooks';
 import { playlists, saveState } from '../state/index.js';
 import { showToast } from '../state/ui.js';
 
 const BATCH_SIZE = 3;
 
-export function useSpotifyImport(onClose) {
-  const [step, setStep] = useState('select'); // 'select' | 'progress'
-  const [error, setError] = useState('');
-  const [pendingPlaylists, setPendingPlaylists] = useState(null);
-  const [modalTitle, setModalTitle] = useState('Import Spotify Playlists');
-  const [startDisabled, setStartDisabled] = useState(true);
-  const [startText, setStartText] = useState('Import');
-  const [progressFill, setProgressFill] = useState(0);
-  const [progressText, setProgressText] = useState('');
-  const [progressCount, setProgressCount] = useState('');
-  const [trackItems, setTrackItems] = useState([]);
-  const [showDoneButtons, setShowDoneButtons] = useState(false);
+const initialState = {
+  step: 'select',        // 'select' | 'progress'
+  error: '',
+  pendingPlaylists: null,
+  modalTitle: 'Import Spotify Playlists',
+  startDisabled: true,
+  startText: 'Import',
+  progressFill: 0,
+  progressText: '',
+  progressCount: '',
+  trackItems: [],
+  showDoneButtons: false,
+};
 
+function reducer(state, action) {
+  switch (action.type) {
+    case 'RESET':
+      return { ...initialState };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    case 'SET_PENDING': {
+      const pending = action.payload;
+      return { ...state, pendingPlaylists: pending, startDisabled: !pending?.length, error: '' };
+    }
+    case 'REMOVE_PENDING': {
+      const updated = state.pendingPlaylists.filter((_, i) => i !== action.payload);
+      return updated.length
+        ? { ...state, pendingPlaylists: updated }
+        : { ...state, pendingPlaylists: null, startDisabled: true };
+    }
+    case 'START_IMPORT':
+      return { ...state, error: '', startDisabled: true, startText: 'Importing...', step: 'progress' };
+    case 'SET_PROGRESS':
+      return { ...state, ...action.payload };
+    case 'UPDATE_TRACK_ITEMS':
+      return { ...state, trackItems: action.payload(state.trackItems) };
+    case 'SET_TRACK_ITEMS':
+      return { ...state, trackItems: action.payload };
+    case 'IMPORT_DONE':
+      return { ...state, ...action.payload, showDoneButtons: true };
+    default:
+      return state;
+  }
+}
+
+export function useSpotifyImport(onClose) {
+  const [state, dispatch] = useReducer(reducer, initialState);
   const cancelledRef = useRef(false);
 
   function createPlaylist(name) {
@@ -28,30 +62,14 @@ export function useSpotifyImport(onClose) {
     return playlist;
   }
 
-  function resetModal() {
-    setStep('select');
-    setError('');
-    setPendingPlaylists(null);
-    setModalTitle('Import Spotify Playlists');
-    setStartDisabled(true);
-    setStartText('Import');
-    setProgressFill(0);
-    setProgressText('');
-    setProgressCount('');
-    setTrackItems([]);
-    setShowDoneButtons(false);
-  }
-
   const cleanup = useCallback(() => {
     cancelledRef.current = true;
-    resetModal();
+    dispatch({ type: 'RESET' });
     if (onClose) onClose();
   }, [onClose]);
 
   const handleOverlayClick = useCallback((e) => {
-    if (e.target === e.currentTarget) {
-      cleanup();
-    }
+    if (e.target === e.currentTarget) cleanup();
   }, [cleanup]);
 
   const handleExportifyLink = useCallback((e) => {
@@ -63,68 +81,49 @@ export function useSpotifyImport(onClose) {
     const result = await window.snowify.spotifyPickCsv();
     if (!result || !result.length) return;
 
-    setPendingPlaylists(prev => {
+    dispatch({ type: 'SET_PENDING', payload: (prev => {
       const existing = prev || [];
       const existingNames = new Set(existing.map(p => p.name));
       const newOnes = result.filter(p => !existingNames.has(p.name));
       return [...existing, ...newOnes];
-    });
-    setStartDisabled(false);
-    setError('');
-  }, []);
+    })(state.pendingPlaylists) });
+  }, [state.pendingPlaylists]);
 
   const handleRemoveFile = useCallback((index) => {
-    setPendingPlaylists(prev => {
-      const updated = prev.filter((_, i) => i !== index);
-      if (!updated.length) {
-        setStartDisabled(true);
-        return null;
-      }
-      return updated;
-    });
+    dispatch({ type: 'REMOVE_PENDING', payload: index });
   }, []);
 
   const handleStart = useCallback(async () => {
-    if (!pendingPlaylists || !pendingPlaylists.length) {
-      setError('Please select at least one CSV file');
+    const pending = state.pendingPlaylists;
+    if (!pending || !pending.length) {
+      dispatch({ type: 'SET_ERROR', payload: 'Please select at least one CSV file' });
       return;
     }
 
-    setError('');
-    setStartDisabled(true);
-    setStartText('Importing...');
-    setStep('progress');
-
+    dispatch({ type: 'START_IMPORT' });
     cancelledRef.current = false;
 
     let totalImported = 0;
     let totalPlaylistCount = 0;
     const allFailedTracks = [];
 
-    for (let pi = 0; pi < pendingPlaylists.length; pi++) {
+    for (let pi = 0; pi < pending.length; pi++) {
       if (cancelledRef.current) break;
 
-      const pl = pendingPlaylists[pi];
+      const pl = pending[pi];
+      const title = pending.length > 1
+        ? `Importing ${pi + 1} of ${pending.length}: ${pl.name}`
+        : pl.name;
 
-      if (pendingPlaylists.length > 1) {
-        setModalTitle(`Importing ${pi + 1} of ${pendingPlaylists.length}: ${pl.name}`);
-      } else {
-        setModalTitle(pl.name);
-      }
-
-      setProgressFill(0);
-      setProgressCount('');
-      setProgressText('Matching tracks...');
+      dispatch({ type: 'SET_PROGRESS', payload: {
+        modalTitle: title, progressFill: 0, progressCount: '', progressText: 'Matching tracks...'
+      }});
 
       const total = pl.tracks.length;
-
       const initialItems = pl.tracks.map((t, i) => ({
-        id: i,
-        title: t.title,
-        artist: t.artist,
-        status: 'pending'
+        id: i, title: t.title, artist: t.artist, status: 'pending'
       }));
-      setTrackItems([...initialItems]);
+      dispatch({ type: 'SET_TRACK_ITEMS', payload: initialItems });
 
       const matchedTracks = [];
       const failedTracks = [];
@@ -158,22 +157,22 @@ export function useSpotifyImport(onClose) {
           }
         }
 
-        setTrackItems(prev => {
+        dispatch({ type: 'UPDATE_TRACK_ITEMS', payload: prev => {
           const updated = [...prev];
           for (const [idx, status] of Object.entries(statusUpdates)) {
             updated[idx] = { ...updated[idx], status };
           }
           return updated;
-        });
+        }});
 
         const done = Math.min(i + BATCH_SIZE, total);
-        setProgressCount(`${done} / ${total}`);
-        setProgressFill((done / total) * 100);
-        setProgressText(
-          pendingPlaylists.length > 1
-            ? `Playlist ${pi + 1}/${pendingPlaylists.length} \u2014 Matching tracks...`
+        dispatch({ type: 'SET_PROGRESS', payload: {
+          progressCount: `${done} / ${total}`,
+          progressFill: (done / total) * 100,
+          progressText: pending.length > 1
+            ? `Playlist ${pi + 1}/${pending.length} \u2014 Matching tracks...`
             : 'Matching tracks...'
-        );
+        }});
       }
 
       if (cancelledRef.current) {
@@ -196,7 +195,9 @@ export function useSpotifyImport(onClose) {
       }
 
       allFailedTracks.push(...failedTracks);
-      setProgressText(`Matched ${matched} of ${total}` + (failed ? ` (${failed} not found)` : ''));
+      dispatch({ type: 'SET_PROGRESS', payload: {
+        progressText: `Matched ${matched} of ${total}` + (failed ? ` (${failed} not found)` : '')
+      }});
     }
 
     if (cancelledRef.current) {
@@ -204,35 +205,37 @@ export function useSpotifyImport(onClose) {
       return;
     }
 
-    if (pendingPlaylists.length > 1) {
-      setModalTitle('Import Complete');
-      setProgressText(`Imported ${totalPlaylistCount} playlist${totalPlaylistCount !== 1 ? 's' : ''} \u2014 ${totalImported} tracks total`);
-      setProgressFill(100);
-      setProgressCount('');
+    let finalTitle, finalText;
+    if (pending.length > 1) {
+      finalTitle = 'Import Complete';
+      finalText = `Imported ${totalPlaylistCount} playlist${totalPlaylistCount !== 1 ? 's' : ''} \u2014 ${totalImported} tracks total`;
       showToast(`Imported ${totalPlaylistCount} playlist${totalPlaylistCount !== 1 ? 's' : ''} \u2014 ${totalImported} tracks`);
     } else if (totalPlaylistCount) {
+      finalTitle = state.modalTitle;
+      finalText = `Imported ${totalImported} tracks`;
       showToast(`Imported ${totalImported} tracks`);
     } else {
+      finalTitle = state.modalTitle;
+      finalText = 'No tracks could be matched';
       showToast('No tracks could be matched');
     }
 
+    let finalItems = [];
     if (allFailedTracks.length) {
-      const failedItems = allFailedTracks.map((t, i) => ({
-        id: `failed-${i}`,
-        title: t.title,
-        artist: t.artist,
-        status: 'unmatched'
-      }));
-      setTrackItems([
+      finalItems = [
         { id: 'failed-header', title: `Failed to match (${allFailedTracks.length})`, artist: '', status: 'header' },
-        ...failedItems
-      ]);
-    } else {
-      setTrackItems([]);
+        ...allFailedTracks.map((t, i) => ({ id: `failed-${i}`, title: t.title, artist: t.artist, status: 'unmatched' }))
+      ];
     }
 
-    setShowDoneButtons(true);
-  }, [pendingPlaylists]);
+    dispatch({ type: 'IMPORT_DONE', payload: {
+      modalTitle: finalTitle,
+      progressText: finalText,
+      progressFill: 100,
+      progressCount: '',
+      trackItems: finalItems,
+    }});
+  }, [state.pendingPlaylists]);
 
   // Cancel in-flight import on unmount
   useEffect(() => {
@@ -241,12 +244,10 @@ export function useSpotifyImport(onClose) {
 
   const handleDone = useCallback(() => {
     cleanup();
-    resetModal();
   }, [cleanup]);
 
   return {
-    step, error, pendingPlaylists, modalTitle, startDisabled, startText,
-    progressFill, progressText, progressCount, trackItems, showDoneButtons,
+    ...state,
     cleanup, handleOverlayClick, handleExportifyLink,
     handlePickFiles, handleRemoveFile, handleStart, handleDone
   };

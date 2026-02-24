@@ -6,14 +6,7 @@ import {
 import { showToast } from '../state/ui.js';
 import { api } from '../services/api.js';
 import { VOLUME_SCALE } from '../../shared/constants.js';
-
-function applyThemeToDOM(themeName) {
-  if (themeName === 'dark') {
-    document.documentElement.removeAttribute('data-theme');
-  } else {
-    document.documentElement.setAttribute('data-theme', themeName);
-  }
-}
+import { applyThemeToDOM } from '../utils/applyThemeToDOM.js';
 
 export function useAppInit(getAudio) {
   const [initialized, setInitialized] = useState(false);

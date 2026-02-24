@@ -29,35 +29,21 @@
 
 #### HIGH
 
-- [ ] **Duplicated `applyThemeToDOM`**
-  - `hooks/useAppInit.js:10-16` and `views/settings/AppearanceSection.jsx:3-9`
-  - Fix: extract to `utils/applyThemeToDOM.js`, import in both
+- [x] **Duplicated `applyThemeToDOM`** — Fixed: extracted to `utils/applyThemeToDOM.js`
 
-- [ ] **`draggedTrack` signal exported from component**
-  - `components/Sidebar/Sidebar.jsx:7`
-  - Fix: move to `state/index.js` or `state/dragState.js`
+- [x] **`draggedTrack` signal exported from component** — Fixed: moved to `state/index.js`
 
-- [ ] **Cross-module import violation**
-  - `views/settings/PlaybackSection.jsx:6` imports `invalidateExploreCache` from `ExploreView.jsx`
-  - Fix: move cache + invalidation to `services/exploreCache.js`
+- [x] **Cross-module import violation** — Fixed: cache + invalidation moved to `services/exploreCache.js`
 
-- [ ] **Module-level cache in component**
-  - `views/ExploreView.jsx:28-48` — `_exploreCache`, `_chartsCache`, timing vars
-  - Fix: move to `services/exploreCache.js`
+- [x] **Module-level cache in component** — Fixed: moved to `services/exploreCache.js`
 
 #### MEDIUM
 
-- [ ] **`handleStart` is 148 lines of async**
-  - `hooks/useSpotifyImport.js:87-235`
-  - Fix: extract batch-processing logic to a utility or split into sub-functions
+- [x] **`handleStart` is 148 lines of async** — Kept inline (business logic tightly coupled to reducer dispatch), refactored with useReducer
 
-- [ ] **VideoPlayer useEffect is 78 lines**
-  - `overlays/VideoPlayer.jsx:96-173`
-  - Fix: extract async video loading to `utils/loadVideo.js` or `hooks/useVideoLoader.js`
+- [x] **VideoPlayer useEffect is 78 lines** — Fixed: extracted to `hooks/useVideoLoader.js`
 
-- [ ] **11 useState in useSpotifyImport**
-  - `hooks/useSpotifyImport.js:8-18`
-  - Fix: consolidate into `useReducer` — many states are derived (`startDisabled` = `!pendingPlaylists?.length`)
+- [x] **11 useState in useSpotifyImport** — Fixed: consolidated into `useReducer`
 
 #### LOW
 
@@ -217,12 +203,12 @@
 11. ~~Create `useFocusTrap` hook, apply to all modals~~ ✅
 12. ~~Add `aria-label` to search input, `aria-atomic` to toast~~ ✅
 
-### Phase 4 — Architecture cleanup
-13. Extract `applyThemeToDOM` to utils/
-14. Move `draggedTrack` to state/
-15. Create `services/exploreCache.js` (move cache + invalidation from ExploreView)
-16. Refactor `useSpotifyImport` to `useReducer`
-17. Extract VideoPlayer loading logic to hook
+### Phase 4 — Architecture cleanup ✅ DONE
+13. ~~Extract `applyThemeToDOM` to utils/~~ ✅
+14. ~~Move `draggedTrack` to state/~~ ✅
+15. ~~Create `services/exploreCache.js` (move cache + invalidation from ExploreView)~~ ✅
+16. ~~Refactor `useSpotifyImport` to `useReducer`~~ ✅
+17. ~~Extract VideoPlayer loading logic to hook~~ ✅
 
 ### Phase 5 — Performance polish
 18. Add `loading="lazy"` to remaining images

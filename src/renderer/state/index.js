@@ -30,6 +30,7 @@ export const cloudRefreshToken = signal('');
 export const lastSyncAt = signal('');
 
 // ─── Transient signals (not persisted) ───
+export const draggedTrack = signal(null);
 export const pendingRadioNav = signal(null);
 export const currentView = signal('home');
 export const queue = signal([]);
