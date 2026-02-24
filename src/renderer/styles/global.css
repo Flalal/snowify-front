@@ -90,6 +90,23 @@ html, body {
 
 .hidden { display: none !important; }
 
+/* ── Text truncation (shared by 25 selectors across the app) ── */
+.np-title, .np-artist,
+.track-title, .track-card .card-title, .track-card .card-artist,
+.album-card-name, .album-card-meta,
+.video-card-name, .video-overlay-title,
+.lib-card-name, .lib-card-meta,
+.playlist-name, .queue-item-title,
+.top-song-title, .top-song-artist, .top-artist-name,
+.trending-video-title, .similar-artist-name,
+.artist-result-name, .quick-pick-card span,
+.spotify-file-name, .spotify-track-title, .spotify-track-artist,
+.picker-item span:first-of-type, .context-sub-item {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* ── Clickable artist links (global — used in track rows, now playing, queue, cards) ── */
 .artist-link {
   cursor: pointer;
@@ -115,7 +132,7 @@ html, body {
   font-family: var(--font);
   cursor: pointer;
   transition: transform var(--transition-bounce), background var(--transition), box-shadow var(--transition);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  box-shadow: var(--shadow-accent-sm);
 }
 .btn-primary:hover {
   transform: scale(1.04);

@@ -1,15 +1,19 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 import { volume } from '../state/index.js';
 import { videoPlayerState } from '../state/navigation.js';
 import { SEEK_STEP_S, VOLUME_STEP } from '../../shared/constants.js';
 
-export function useKeyboardShortcuts({ getAudio, togglePlay, playNext, playPrev, setVolumeLevel, switchView }) {
+export function useKeyboardShortcuts(callbacks) {
+  const cbRef = useRef(callbacks);
+  cbRef.current = callbacks;
+
   useEffect(() => {
     const handler = (e) => {
       if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
         if (e.key === 'Escape') e.target.blur();
         return;
       }
+      const { getAudio, togglePlay, playNext, playPrev, setVolumeLevel, switchView } = cbRef.current;
       const audio = getAudio();
       switch (e.key) {
         case ' ':

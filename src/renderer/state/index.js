@@ -66,12 +66,16 @@ const PERSISTENT_KEYS = {
 };
 
 function _writeState() {
-  const data = {};
-  for (const [key, sig] of Object.entries(PERSISTENT_KEYS)) {
-    data[key] = sig.value;
+  try {
+    const data = {};
+    for (const [key, sig] of Object.entries(PERSISTENT_KEYS)) {
+      data[key] = sig.value;
+    }
+    localStorage.setItem('snowify_state', JSON.stringify(data));
+    localStorage.setItem('snowify_lastSave', String(Date.now()));
+  } catch (err) {
+    console.error('Failed to save state:', err);
   }
-  localStorage.setItem('snowify_state', JSON.stringify(data));
-  localStorage.setItem('snowify_lastSave', String(Date.now()));
 }
 
 let _saveTimer = null;

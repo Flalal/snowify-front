@@ -69,9 +69,9 @@ export function PlaylistPickerModal() {
   }
 
   return (
-    <div className="modal-overlay" onClick={onOverlay} onKeyDown={onKey}>
+    <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="picker-modal-title" onClick={onOverlay} onKeyDown={onKey}>
       <div className="modal-box picker-box">
-        <h3>Add to playlist</h3>
+        <h3 id="picker-modal-title">Add to playlist</h3>
         <div className="picker-list">
           {/* Liked Songs */}
           <button className="picker-item" onClick={handleLiked}>

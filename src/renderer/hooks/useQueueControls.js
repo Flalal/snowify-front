@@ -1,4 +1,4 @@
-import { useCallback } from 'preact/hooks';
+import { useCallback, useRef } from 'preact/hooks';
 import {
   queue, originalQueue, queueIndex, isPlaying, isLoading,
   shuffle, repeat, volume, autoplay, currentTrack, saveState
@@ -13,9 +13,13 @@ import {
 import { api } from '../services/api.js';
 
 export function useQueueControls(getAudio, playTrack) {
+  const fillingRef = useRef(false);
+
   const smartQueueFill = useCallback(async () => {
+    if (fillingRef.current) return;
     const current = currentTrack.value;
     if (!current) return;
+    fillingRef.current = true;
     showToast('Autoplay: finding similar songs...');
     try {
       const queueIds = new Set(queue.value.map(t => t.id));
@@ -58,6 +62,8 @@ export function useQueueControls(getAudio, playTrack) {
       console.error('Autoplay error:', err);
       showToast('Autoplay failed');
       isPlaying.value = false;
+    } finally {
+      fillingRef.current = false;
     }
   }, [playTrack]);
 

@@ -22,10 +22,33 @@ export function ProgressBar({ currentTime, duration, onSeek }) {
     document.addEventListener('mouseup', onUp);
   };
 
+  const onKeyDown = (e) => {
+    if (!duration || !onSeek) return;
+    const step = 5;
+    if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      onSeek(Math.min(1, (currentTime + step) / duration));
+    } else if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      onSeek(Math.max(0, (currentTime - step) / duration));
+    }
+  };
+
   return (
     <div className="np-progress">
       <span className="time">{formatTime(currentTime)}</span>
-      <div className="progress-bar" ref={barRef} onMouseDown={onMouseDown}>
+      <div
+        className="progress-bar"
+        ref={barRef}
+        role="slider"
+        aria-label="Seek"
+        aria-valuenow={Math.round(currentTime)}
+        aria-valuemin={0}
+        aria-valuemax={Math.round(duration) || 0}
+        tabIndex={0}
+        onMouseDown={onMouseDown}
+        onKeyDown={onKeyDown}
+      >
         <div className="progress-fill" style={{ width: pct + '%' }}>
           <div className="progress-handle"></div>
         </div>

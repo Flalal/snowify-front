@@ -75,9 +75,6 @@
 .context-sub-item {
   padding: 8px 14px;
   font-size: 13px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* ── Light-mode overrides ── */

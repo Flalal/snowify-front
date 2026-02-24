@@ -1,4 +1,4 @@
-import { useRef } from 'preact/hooks';
+import { useRef, useEffect } from 'preact/hooks';
 import { useContextMenu } from '../../hooks/useContextMenu.js';
 import { playlists, currentView, currentPlaylistId, saveState } from '../../state/index.js';
 import {
@@ -17,6 +17,16 @@ export function PlaylistContextMenu() {
   const total = plMenuTotal.value;
 
   useContextMenu(menuRef, visible, plMenuX.value, plMenuY.value, removePlaylistContextMenu);
+
+  // Auto-focus first menu item when opened
+  useEffect(() => {
+    if (visible && menuRef.current) {
+      requestAnimationFrame(() => {
+        const first = menuRef.current?.querySelector('[role="menuitem"]');
+        if (first) first.focus();
+      });
+    }
+  }, [visible]);
 
   if (!visible || !playlist) return null;
 
@@ -65,27 +75,61 @@ export function PlaylistContextMenu() {
     removePlaylistContextMenu();
   }
 
+  function handleMenuKeyDown(e) {
+    const items = menuRef.current?.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])');
+    if (!items?.length) return;
+    const focused = document.activeElement;
+    const idx = Array.from(items).indexOf(focused);
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        items[(idx + 1) % items.length]?.focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        items[(idx - 1 + items.length) % items.length]?.focus();
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        focused?.click();
+        break;
+      case 'Escape':
+        removePlaylistContextMenu();
+        break;
+    }
+  }
+
   return (
     <div
       ref={menuRef}
       className="context-menu"
+      role="menu"
       style={{ left: plMenuX.value + 'px', top: plMenuY.value + 'px' }}
+      onKeyDown={handleMenuKeyDown}
     >
-      <div className="context-menu-item" onClick={handleRename}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} onClick={handleRename}>
         Rename
       </div>
-      <div className="context-menu-item" onClick={handleDelete}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} onClick={handleDelete}>
         Delete
       </div>
-      <div className="context-menu-divider" />
+      <div className="context-menu-divider" role="separator" />
       <div
         className={`context-menu-item${isFirst ? ' context-menu-item-disabled' : ''}`}
+        role="menuitem"
+        tabIndex={-1}
+        aria-disabled={isFirst ? 'true' : undefined}
         onClick={handleMoveUp}
       >
         Move Up
       </div>
       <div
         className={`context-menu-item${isLast ? ' context-menu-item-disabled' : ''}`}
+        role="menuitem"
+        tabIndex={-1}
+        aria-disabled={isLast ? 'true' : undefined}
         onClick={handleMoveDown}
       >
         Move Down

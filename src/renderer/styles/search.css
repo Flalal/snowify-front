@@ -72,7 +72,7 @@
 #search-input:focus {
   background: rgba(255, 255, 255, 0.08);
   border-color: var(--accent-border);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  box-shadow: var(--shadow-focus);
 }
 
 .search-clear {
@@ -132,9 +132,6 @@
 .artist-result-name {
   font-size: 15px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .artist-result-label {
   font-size: 12px;

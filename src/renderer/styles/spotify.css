@@ -98,9 +98,6 @@
 }
 .spotify-file-name {
   color: var(--text-primary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   flex: 1;
   text-transform: capitalize;
 }
@@ -237,18 +234,12 @@
 }
 .spotify-track-title {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .spotify-track-artist {
   flex-shrink: 0;
   color: var(--text-subdued);
   font-size: 12px;
   max-width: 140px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .spotify-failed-header {
   font-size: 12px;

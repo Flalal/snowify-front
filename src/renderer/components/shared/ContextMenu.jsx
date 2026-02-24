@@ -1,4 +1,4 @@
-import { useRef } from 'preact/hooks';
+import { useRef, useEffect } from 'preact/hooks';
 import { useContextMenu } from '../../hooks/useContextMenu.js';
 import { playlists, likedSongs, recentTracks, queue, queueIndex, pendingRadioNav, saveState } from '../../state/index.js';
 import { showToast, menuVisible, menuX, menuY, menuTrack, menuOptions, removeContextMenu } from '../../state/ui.js';
@@ -15,11 +15,47 @@ export function ContextMenu() {
 
   useContextMenu(menuRef, visible, menuX.value, menuY.value, removeContextMenu);
 
+  // Auto-focus first menu item when opened
+  useEffect(() => {
+    if (visible && menuRef.current) {
+      requestAnimationFrame(() => {
+        const first = menuRef.current?.querySelector('[role="menuitem"]');
+        if (first) first.focus();
+      });
+    }
+  }, [visible]);
+
   if (!visible || !track) return null;
 
   const isLiked = likedSongs.value.some(t => t.id === track.id);
   const isRecent = recentTracks.value.some(t => t.id === track.id);
   const playlistList = playlists.value;
+
+  function handleMenuKeyDown(e) {
+    const items = menuRef.current?.querySelectorAll('[role="menuitem"]');
+    if (!items?.length) return;
+    const focused = document.activeElement;
+    const idx = Array.from(items).indexOf(focused);
+
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault();
+        items[(idx + 1) % items.length]?.focus();
+        break;
+      case 'ArrowUp':
+        e.preventDefault();
+        items[(idx - 1 + items.length) % items.length]?.focus();
+        break;
+      case 'Enter':
+      case ' ':
+        e.preventDefault();
+        focused?.click();
+        break;
+      case 'Escape':
+        removeContextMenu();
+        break;
+    }
+  }
 
   function handleAction(action, pid) {
     switch (action) {
@@ -102,18 +138,23 @@ export function ContextMenu() {
     // Submenu for many playlists
     playlistSection = (
       <>
-        <div className="context-menu-divider" />
+        <div className="context-menu-divider" role="separator" />
         <div
           className="context-menu-has-sub"
+          role="menuitem"
+          tabIndex={-1}
+          aria-haspopup="true"
           onClick={(e) => e.stopPropagation()}
         >
           <span>Add to playlist</span>
           <span className="sub-arrow">{'\u25B8'}</span>
-          <div className="context-submenu">
+          <div className="context-submenu" role="menu">
             {playlistList.map(p => (
               <div
                 key={p.id}
                 className="context-menu-item context-sub-item"
+                role="menuitem"
+                tabIndex={-1}
                 data-action="add-to-playlist"
                 data-pid={p.id}
                 onClick={(e) => { e.stopPropagation(); handleAction('add-to-playlist', p.id); }}
@@ -128,11 +169,13 @@ export function ContextMenu() {
   } else if (playlistList.length) {
     playlistSection = (
       <>
-        <div className="context-menu-divider" />
+        <div className="context-menu-divider" role="separator" />
         {playlistList.map(p => (
           <div
             key={p.id}
             className="context-menu-item"
+            role="menuitem"
+            tabIndex={-1}
             data-action="add-to-playlist"
             data-pid={p.id}
             onClick={() => handleAction('add-to-playlist', p.id)}
@@ -148,35 +191,37 @@ export function ContextMenu() {
     <div
       ref={menuRef}
       className="context-menu"
+      role="menu"
       style={{ left: menuX.value + 'px', top: menuY.value + 'px' }}
+      onKeyDown={handleMenuKeyDown}
     >
-      <div className="context-menu-item" data-action="play" onClick={() => handleAction('play')}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="play" onClick={() => handleAction('play')}>
         Play
       </div>
-      <div className="context-menu-item" data-action="play-next" onClick={() => handleAction('play-next')}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="play-next" onClick={() => handleAction('play-next')}>
         Play Next
       </div>
-      <div className="context-menu-item" data-action="add-queue" onClick={() => handleAction('add-queue')}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="add-queue" onClick={() => handleAction('add-queue')}>
         Add to Queue
       </div>
-      <div className="context-menu-divider" />
-      <div className="context-menu-item" data-action="watch-video" onClick={() => handleAction('watch-video')}>
+      <div className="context-menu-divider" role="separator" />
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="watch-video" onClick={() => handleAction('watch-video')}>
         Watch Video
       </div>
-      <div className="context-menu-item" data-action="like" onClick={() => handleAction('like')}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="like" onClick={() => handleAction('like')}>
         {isLiked ? 'Unlike' : 'Like'}
       </div>
-      <div className="context-menu-item" data-action="start-radio" onClick={() => handleAction('start-radio')}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="start-radio" onClick={() => handleAction('start-radio')}>
         Start Radio
       </div>
       {playlistSection}
-      <div className="context-menu-divider" />
+      <div className="context-menu-divider" role="separator" />
       {isRecent && (
-        <div className="context-menu-item" data-action="remove-from-recent" onClick={() => handleAction('remove-from-recent')}>
+        <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="remove-from-recent" onClick={() => handleAction('remove-from-recent')}>
           Remove from Recently Played
         </div>
       )}
-      <div className="context-menu-item" data-action="share" onClick={() => handleAction('share')}>
+      <div className="context-menu-item" role="menuitem" tabIndex={-1} data-action="share" onClick={() => handleAction('share')}>
         Copy Link
       </div>
     </div>

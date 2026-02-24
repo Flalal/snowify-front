@@ -59,9 +59,6 @@
 .queue-item-title {
   font-size: 13px;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .queue-item-artist {
   font-size: 12px;

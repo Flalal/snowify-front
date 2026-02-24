@@ -1,7 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
-import { queue, queueIndex, isPlaying } from '../../state/index.js';
-import { showToast } from '../../state/ui.js';
-import { api } from '../../services/api.js';
+import { useRef, useEffect } from 'preact/hooks';
+import { useLyrics } from '../../hooks/useLyrics.js';
 
 /**
  * LyricsPanel -- Slide-out panel displaying synced or plain lyrics.
@@ -12,149 +10,8 @@ import { api } from '../../services/api.js';
  *   - audio: the HTML audio element used for playback
  */
 export function LyricsPanel({ visible, onClose, audio }) {
-  const [lyricsLines, setLyricsLines] = useState([]);
-  const [lyricsType, setLyricsType] = useState(null); // 'synced' | 'plain' | 'empty' | 'error' | 'loading'
-  const [plainText, setPlainText] = useState('');
-  const [activeIdx, setActiveIdx] = useState(-1);
-
-  const trackIdRef = useRef(null);
-  const lyricsLinesRef = useRef([]);
-  const lastActiveIdxRef = useRef(-1);
-  const syncIntervalRef = useRef(null);
+  const { lyricsLines, lyricsType, plainText, activeIdx, handleLineClick } = useLyrics(visible, audio);
   const bodyRef = useRef(null);
-
-  const currentTrack = (() => {
-    const q = queue.value;
-    const idx = queueIndex.value;
-    return (idx >= 0 && idx < q.length) ? q[idx] : null;
-  })();
-
-  // ── LRC parser ──
-  const parseLRC = useCallback((lrcText) => {
-    const lines = [];
-    const regex = /\[(\d{2}):(\d{2})\.(\d{2,3})\]\s*(.*)/;
-    lrcText.split('\n').forEach(line => {
-      const match = line.match(regex);
-      if (match) {
-        const min = parseInt(match[1]);
-        const sec = parseInt(match[2]);
-        let ms = parseInt(match[3]);
-        if (match[3].length === 2) ms *= 10;
-        const time = min * 60 + sec + ms / 1000;
-        const text = match[4].trim();
-        if (text) lines.push({ time, text });
-      }
-    });
-    return lines.sort((a, b) => a.time - b.time);
-  }, []);
-
-  // ── Sync lyrics with audio playback ──
-  const syncLyrics = useCallback(() => {
-    if (!lyricsLinesRef.current.length || !audio) return;
-    const ct = audio.currentTime;
-
-    // Find current line index
-    let foundIdx = -1;
-    for (let i = lyricsLinesRef.current.length - 1; i >= 0; i--) {
-      if (ct >= lyricsLinesRef.current[i].time) {
-        foundIdx = i;
-        break;
-      }
-    }
-
-    if (foundIdx === lastActiveIdxRef.current) return;
-    lastActiveIdxRef.current = foundIdx;
-    setActiveIdx(foundIdx);
-  }, [audio]);
-
-  const startLyricsSync = useCallback(() => {
-    stopLyricsSync();
-    if (!lyricsLinesRef.current.length || !audio) return;
-    syncLyrics();
-    syncIntervalRef.current = setInterval(() => {
-      if (audio.paused) return;
-      syncLyrics();
-    }, 100);
-  }, [audio, syncLyrics]);
-
-  function stopLyricsSync() {
-    if (syncIntervalRef.current) {
-      clearInterval(syncIntervalRef.current);
-      syncIntervalRef.current = null;
-    }
-  }
-
-  // ── Fetch and display lyrics ──
-  const fetchAndShowLyrics = useCallback(async (track) => {
-    if (!track) return;
-    trackIdRef.current = track.id;
-    lyricsLinesRef.current = [];
-    lastActiveIdxRef.current = -1;
-    setLyricsLines([]);
-    setActiveIdx(-1);
-    setLyricsType('loading');
-
-    // Parse duration: try audio.duration first, then the track string "m:ss"
-    let durationSec = null;
-    if (audio && audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
-      durationSec = Math.round(audio.duration);
-    } else if (track.duration) {
-      const parts = track.duration.split(':');
-      if (parts.length === 2) durationSec = parseInt(parts[0]) * 60 + parseInt(parts[1]);
-    }
-
-    try {
-      const result = await api.getLyrics(track.title, track.artist, track.album || '', durationSec);
-
-      // Ensure we're still viewing the same track
-      if (trackIdRef.current !== track.id) return;
-
-      if (!result) {
-        setLyricsType('empty');
-        return;
-      }
-
-      if (result.synced) {
-        const parsed = parseLRC(result.synced);
-        lyricsLinesRef.current = parsed;
-        setLyricsLines(parsed);
-        setLyricsType('synced');
-        startLyricsSync();
-      } else if (result.plain) {
-        setPlainText(result.plain);
-        setLyricsType('plain');
-        showToast('Synced lyrics not available for this song');
-      } else {
-        setLyricsType('empty');
-      }
-    } catch (err) {
-      console.error('Lyrics error:', err);
-      if (trackIdRef.current === track.id) {
-        setLyricsType('error');
-      }
-    }
-  }, [audio, parseLRC, startLyricsSync]);
-
-  // ── Fetch lyrics when panel becomes visible or track changes ──
-  useEffect(() => {
-    if (visible && currentTrack && trackIdRef.current !== currentTrack.id) {
-      fetchAndShowLyrics(currentTrack);
-    }
-    if (visible) {
-      startLyricsSync();
-    } else {
-      stopLyricsSync();
-    }
-    return () => stopLyricsSync();
-  }, [visible, currentTrack?.id, fetchAndShowLyrics, startLyricsSync]);
-
-  // ── Track change handler: reset when lyrics not visible ──
-  useEffect(() => {
-    lastActiveIdxRef.current = -1;
-    if (!visible) {
-      trackIdRef.current = null;
-    }
-  }, [currentTrack?.id, visible]);
 
   // ── Auto-scroll active line to center ──
   useEffect(() => {
@@ -164,17 +21,6 @@ export function LyricsPanel({ visible, onClose, audio }) {
       allLines[activeIdx].scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }, [activeIdx, lyricsType]);
-
-  // ── Click on synced line seeks audio ──
-  const handleLineClick = useCallback((time) => {
-    if (audio && audio.duration && !isNaN(time)) {
-      audio.currentTime = time;
-      if (audio.paused) {
-        audio.play();
-        isPlaying.value = true;
-      }
-    }
-  }, [audio]);
 
   // ── Render body content ──
   function renderBody() {
@@ -263,10 +109,12 @@ export function LyricsPanel({ visible, onClose, audio }) {
     <div
       id="lyrics-panel"
       className={`lyrics-panel${visible ? ' visible' : ' hidden'}`}
+      role="complementary"
+      aria-label="Lyrics"
     >
       <div className="lyrics-header">
         <h3>Lyrics</h3>
-        <button id="btn-close-lyrics" className="icon-btn" onClick={onClose}>
+        <button id="btn-close-lyrics" className="icon-btn" aria-label="Close lyrics" onClick={onClose}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />

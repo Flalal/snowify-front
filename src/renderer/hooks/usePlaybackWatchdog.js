@@ -4,6 +4,8 @@ import { showToast } from '../state/ui.js';
 import { WATCHDOG_INTERVAL_MS, WATCHDOG_STALL_TICKS } from '../../shared/constants.js';
 
 export function usePlaybackWatchdog(getAudio, playNext) {
+  const playNextRef = useRef(playNext);
+  playNextRef.current = playNext;
   const watchdogRef = useRef({ lastTime: -1, stallTicks: 0 });
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export function usePlaybackWatchdog(getAudio, playNext) {
           watchdogRef.current.stallTicks = 0;
           watchdogRef.current.lastTime = -1;
           showToast('Stream stalled — skipping to next');
-          playNext();
+          playNextRef.current();
         }
       } else {
         watchdogRef.current.stallTicks = 0;

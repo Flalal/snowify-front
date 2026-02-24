@@ -10,6 +10,8 @@ export function Toast() {
     <div
       id="toast"
       className={`toast${hidden ? ' hidden' : ''}${show ? ' show' : ''}`}
+      role="status"
+      aria-live="polite"
     >
       {toastMessage.value}
     </div>

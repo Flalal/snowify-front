@@ -1,4 +1,4 @@
-import { useEffect } from 'preact/hooks';
+import { useEffect, useRef } from 'preact/hooks';
 import { queue, queueIndex, isPlaying, isLoading, currentTrack } from '../state/index.js';
 import { showToast } from '../state/ui.js';
 import { updateDiscordPresence, clearDiscordPresence } from '../utils/discordPresence.js';
@@ -14,6 +14,12 @@ export function usePlayback() {
     setVolumeLevel, toggleShuffle, toggleRepeat
   } = useQueueControls(getAudio, playTrack);
 
+  // Fresh refs for use in effects with stable [] deps
+  const playNextRef = useRef(playNext);
+  playNextRef.current = playNext;
+  const playTrackRef = useRef(playTrack);
+  playTrackRef.current = playTrack;
+
   // Wire up media session update (breaks circular dep between playTrack and playNext/playPrev)
   onTrackPlayedRef.current = (track) => {
     updateMediaSession(track, { getAudio, playPrev, playNext });
@@ -24,7 +30,7 @@ export function usePlayback() {
     const audio = getAudio();
     if (!audio) return;
 
-    const onEnded = () => playNext();
+    const onEnded = () => playNextRef.current();
     const onError = () => {
       isPlaying.value = false;
       isLoading.value = false;
@@ -33,7 +39,7 @@ export function usePlayback() {
       const nextIdx = queueIndex.value + 1;
       if (nextIdx < queue.value.length) {
         queueIndex.value = nextIdx;
-        playTrack(queue.value[nextIdx]);
+        playTrackRef.current(queue.value[nextIdx]);
       }
     };
     const onSeeked = () => {

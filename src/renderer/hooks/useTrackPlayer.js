@@ -62,11 +62,12 @@ export function useTrackPlayer() {
       isPlaying.value = false;
       isLoading.value = false;
       if (!skipAdvanceRef.current) {
+        const q = queue.value;
         const nextIdx = queueIndex.value + 1;
-        if (nextIdx < queue.value.length) {
+        if (nextIdx < q.length) {
           skipAdvanceRef.current = true;
           queueIndex.value = nextIdx;
-          playTrack(queue.value[nextIdx]).finally(() => { skipAdvanceRef.current = false; });
+          playTrack(q[nextIdx]).finally(() => { skipAdvanceRef.current = false; });
         }
       }
     }

@@ -76,9 +76,6 @@
 .track-title {
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .track-row.playing .track-title { color: var(--accent); }
 

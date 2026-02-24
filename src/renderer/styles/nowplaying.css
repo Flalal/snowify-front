@@ -43,9 +43,6 @@
 .np-title {
   font-size: 14px;
   font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .np-title.clickable {
   cursor: pointer;
@@ -56,9 +53,6 @@
 .np-artist {
   font-size: 12px;
   color: var(--text-subdued);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .np-like {
   flex-shrink: 0;

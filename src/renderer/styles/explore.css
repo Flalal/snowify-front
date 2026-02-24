@@ -96,16 +96,10 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .top-song-artist {
   font-size: 12px;
   color: var(--text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .top-song-artist.clickable {
   cursor: pointer;
@@ -166,9 +160,6 @@
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   max-width: 100%;
 }
 .top-artist-rank {
@@ -200,9 +191,6 @@
   font-weight: 500;
   color: var(--text-primary);
   margin-top: 8px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .trending-video-artist {
   font-size: 12px;

@@ -34,9 +34,6 @@
   padding: 0 16px;
   font-size: 14px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 .quick-pick-card .qp-play {
   position: absolute;
@@ -54,7 +51,7 @@
   opacity: 0;
   transform: translateY(6px) scale(0.9);
   transition: opacity 0.25s, transform var(--transition-bounce);
-  box-shadow: 0 4px 16px var(--accent-glow);
+  box-shadow: var(--shadow-accent-sm);
 }
 .quick-pick-card:hover .qp-play {
   opacity: 1;

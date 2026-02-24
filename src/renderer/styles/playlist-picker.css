@@ -45,9 +45,6 @@
 }
 .picker-item span:first-of-type {
   flex: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 .picker-count {
   font-size: 12px;

@@ -98,7 +98,7 @@
 }
 .settings-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim, rgba(29, 185, 84, 0.15));
+  box-shadow: var(--shadow-focus);
 }
 
 /* ── Select dropdown ── */
@@ -129,7 +129,7 @@
 .settings-select:hover { border-color: rgba(255, 255, 255, 0.2); }
 .settings-select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
+  box-shadow: var(--shadow-focus);
 }
 .settings-select:disabled {
   opacity: 0.35;

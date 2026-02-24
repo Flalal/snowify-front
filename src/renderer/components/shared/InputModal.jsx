@@ -37,7 +37,7 @@ export function InputModal() {
   }
 
   return (
-    <div id="input-modal" className="modal-overlay" onClick={onOverlay}>
+    <div id="input-modal" className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="input-modal-title" onClick={onOverlay}>
       <div className="modal-box">
         <h3 id="input-modal-title">{modalTitle.value}</h3>
         <input
