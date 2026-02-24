@@ -1,4 +1,6 @@
+import { useRef } from 'preact/hooks';
 import { useSpotifyImport } from '../../hooks/useSpotifyImport.js';
+import { useFocusTrap } from '../../hooks/useFocusTrap.js';
 
 /**
  * SpotifyImport -- Modal overlay for importing Spotify playlists from CSV files.
@@ -8,6 +10,9 @@ import { useSpotifyImport } from '../../hooks/useSpotifyImport.js';
  *   - onClose: callback to close the modal
  */
 export function SpotifyImport({ visible, onClose }) {
+  const trapRef = useRef(null);
+  useFocusTrap(trapRef, visible);
+
   const {
     step, error, pendingPlaylists, modalTitle, startDisabled, startText,
     progressFill, progressText, progressCount, trackItems, showDoneButtons,
@@ -26,7 +31,7 @@ export function SpotifyImport({ visible, onClose }) {
       aria-labelledby="spotify-modal-title"
       onClick={handleOverlayClick}
     >
-      <div className="spotify-modal-content">
+      <div className="spotify-modal-content" ref={trapRef}>
         <div className="spotify-modal-header">
           <h2 id="spotify-modal-title">{modalTitle}</h2>
           <button id="spotify-cancel" className="icon-btn" aria-label="Close" onClick={cleanup}>

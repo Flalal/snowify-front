@@ -207,13 +207,16 @@ export function HomeView() {
               className="quick-pick-card"
               data-track-id={track.id}
               draggable="true"
+              tabIndex={0}
               onClick={() => handleTrackPlay(track)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleTrackPlay(track); } }}
             >
-              <img src={track.thumbnail} alt="" />
+              <img src={track.thumbnail} alt={track.title} />
               <span>{track.title}</span>
               <button
                 className="qp-play"
                 title="Play"
+                aria-label="Play"
                 onClick={(e) => { e.stopPropagation(); handleTrackPlay(track); }}
               >
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">

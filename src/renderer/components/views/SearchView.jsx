@@ -113,12 +113,13 @@ export function SearchView() {
           id="search-input"
           type="text"
           placeholder="What do you want to listen to?"
+          aria-label="Search songs, artists, albums"
           value={query}
           onInput={handleInput}
           onKeyDown={handleKeyDown}
         />
         {trimmedQuery && (
-          <button className="search-clear" onClick={handleClear}>
+          <button className="search-clear" aria-label="Clear search" onClick={handleClear}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
               <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" />
             </svg>
@@ -162,12 +163,14 @@ export function SearchView() {
             <div
               className="artist-result-card"
               data-artist-id={topArtist.artistId}
+              tabIndex={0}
               onClick={() => openArtistPage(topArtist.artistId)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openArtistPage(topArtist.artistId); } }}
             >
               <img
                 className="artist-result-avatar"
                 src={topArtist.thumbnail || ''}
-                alt=""
+                alt={topArtist.name}
               />
               <div className="artist-result-info">
                 <div className="artist-result-name">{topArtist.name}</div>

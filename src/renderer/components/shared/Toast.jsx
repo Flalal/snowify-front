@@ -12,6 +12,7 @@ export function Toast() {
       className={`toast${hidden ? ' hidden' : ''}${show ? ' show' : ''}`}
       role="status"
       aria-live="polite"
+      aria-atomic="true"
     >
       {toastMessage.value}
     </div>

@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import { isPlaying, volume, videoQuality, videoPremuxed } from '../../state/index.js';
 import { showToast } from '../../state/ui.js';
 import { api } from '../../services/api.js';
+import { useFocusTrap } from '../../hooks/useFocusTrap.js';
 
 /**
  * VideoPlayer -- Full-screen overlay for music video playback.
@@ -20,6 +21,8 @@ export function VideoPlayer({ videoId, title, artist, onClose }) {
   const videoAudioRef = useRef(null);
   const wasPlayingRef = useRef(false);
   const overlayRef = useRef(null);
+
+  useFocusTrap(overlayRef, !!videoId);
 
   // ── Sync helpers (stable refs to avoid stale closures) ──
   const syncVideoAudio = useCallback(() => {

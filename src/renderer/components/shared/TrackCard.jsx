@@ -32,16 +32,18 @@ export function TrackCard({ track, onPlay, onContextMenu, onDragStart }) {
       className="track-card"
       data-track-id={track.id}
       draggable="true"
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
     >
-      <img className="card-thumb" src={track.thumbnail} alt="" loading="lazy" />
+      <img className="card-thumb" src={track.thumbnail} alt={track.title} loading="lazy" />
       <div className="card-title">{track.title}</div>
       <div className="card-artist">
         <ArtistLink track={track} />
       </div>
-      <button className="card-play" title="Play" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
+      <button className="card-play" title="Play" aria-label="Play" onClick={(e) => { e.stopPropagation(); handleClick(); }}>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7L8 5z" />
         </svg>

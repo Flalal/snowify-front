@@ -39,11 +39,13 @@ export function AlbumCard({ album, onPlay, onClick, onContextMenu }) {
     <div
       className="album-card"
       data-album-id={album.albumId}
+      tabIndex={0}
       onClick={handleClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
       onContextMenu={handleContextMenu}
     >
-      <img className="album-card-cover" src={album.thumbnail} alt="" loading="lazy" />
-      <button className="album-card-play" title="Play" onClick={handlePlayClick}>
+      <img className="album-card-cover" src={album.thumbnail} alt={album.name} loading="lazy" />
+      <button className="album-card-play" title="Play" aria-label="Play" onClick={handlePlayClick}>
         <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
           <path d="M8 5v14l11-7L8 5z" />
         </svg>

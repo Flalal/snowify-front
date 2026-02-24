@@ -77,7 +77,7 @@ export function TrackRow({
         </span>
       </div>
       <div className="track-main">
-        <img className="track-thumb" src={track.thumbnail} alt="" loading="lazy" />
+        <img className="track-thumb" src={track.thumbnail} alt={track.title} loading="lazy" />
         <div className="track-details">
           <div className="track-title">{track.title}</div>
         </div>
@@ -89,6 +89,7 @@ export function TrackRow({
         <button
           className={`track-like-btn${isLiked ? ' liked' : ''}`}
           title="Like"
+          aria-label="Like"
           onClick={handleLikeClick}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -100,6 +101,7 @@ export function TrackRow({
         <button
           className="track-add-btn"
           title="Add to playlist"
+          aria-label="Add to playlist"
           onClick={handleAddToPlaylist}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

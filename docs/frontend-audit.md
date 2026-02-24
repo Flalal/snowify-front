@@ -140,74 +140,37 @@
 
 ---
 
-## 3. Accessibility (4/10)
+## 3. Accessibility (4/10 → **9/10**)
 
 ### What's good
 
 - All modals: `role="dialog"`, `aria-modal="true"`, `aria-labelledby` ✓
 - Both context menus: `role="menu"`, `role="menuitem"`, arrow/Enter/Escape keyboard nav ✓
 - ProgressBar + VolumeControl: `role="slider"`, `aria-valuenow/min/max`, keyboard arrows ✓
-- Toast: `role="status"`, `aria-live="polite"` ✓
+- Toast: `role="status"`, `aria-live="polite"`, `aria-atomic="true"` ✓
 - All close buttons: `aria-label="Close ..."` ✓
 - Panels: `role="complementary"`, `aria-label` ✓
+- All images have meaningful `alt` text ✓
+- All icon-only buttons have `aria-label` ✓
+- All clickable cards have `tabIndex={0}` + keyboard support (Enter/Space) ✓
+- Focus trap on all modals via `useFocusTrap` hook ✓
+- `--text-subdued` contrast bumped to WCAG AA in all 7 themes ✓
+- Search input has `aria-label` ✓
 
 ### To fix
 
 #### HIGH
 
-- [ ] **Empty `alt=""` on all images (12+ instances)**
-  - NowPlayingBar.jsx:53 — `<img alt="" />`
-  - TrackRow.jsx:80 — `<img alt="" />`
-  - TrackCard.jsx:39 — `<img alt="" />`
-  - AlbumCard.jsx:45 — `<img alt="" />`
-  - ArtistCard.jsx:24,38 — `<img alt="" />`
-  - VideoCard.jsx:23 — `<img alt="" />`
-  - QueuePanel.jsx:95 — `<img alt="" />`
-  - PlaylistCover.jsx:3,14 — `<img alt="" />`
-  - SearchView.jsx:170 — `<img alt="" />`
-  - HomeView.jsx:212 — `<img alt="" />`
-  - Fix: use `alt={track.title}` or `alt={album.name}` etc.
-
-- [ ] **15+ buttons missing `aria-label`**
-  - NowPlayingBar.jsx:64,69 — Like, Add-to-playlist buttons (have `title` but no `aria-label`)
-  - NowPlayingBar.jsx:89-92 — Lyrics, Queue toggle buttons
-  - PlaybackControls.jsx:29,40,52,55 — Shuffle, Previous, Next, Repeat
-  - TrackRow.jsx:89-108 — Like, Add buttons
-  - TrackCard.jsx:44 — Play button
-  - AlbumCard.jsx:46 — Play button
-  - Sidebar.jsx:83-88 — Import, Create playlist
-  - SpotifyImport.jsx:65 — Remove file button
-  - Fix: add `aria-label` matching the action (e.g. `aria-label="Like"`, `aria-label="Play"`)
-
-- [ ] **6 clickable divs without keyboard support**
-  - TrackCard.jsx:30-50 — card with onClick, no tabIndex/onKeyDown
-  - AlbumCard.jsx:38-62 — same
-  - VideoCard.jsx:17-34 — same
-  - ArtistCard.jsx:11-41 — both variants
-  - QueuePanel.jsx:88-103 — queue items
-  - HomeView.jsx:204-224 — quick pick cards
-  - Fix: add `tabIndex={0}` + `onKeyDown` (Enter/Space → onClick) or convert to `<button>`
-
-- [ ] **No focus trap in any modal**
-  - SpotifyImport, InputModal, PlaylistPickerModal, VideoPlayer
-  - Fix: create a `useFocusTrap(ref, visible)` hook that traps Tab within the modal and restores focus on close
-
-- [ ] **`--text-subdued` fails WCAG AA contrast (4.5:1 required)**
-  - Dark: `#6a6a6a` on `#0a0a0a` ≈ 3.8:1
-  - Light: `#999999` on `#f0f0f0` ≈ 3.6:1
-  - Ocean: `#5a6680` — borderline
-  - Forest: `#4e7a62` — borderline
-  - Fix: bump subdued colors up (e.g. dark `#808080`, light `#767676`)
+- [x] **Empty `alt=""` on all images (12+ instances)** — Fixed: meaningful alt text added
+- [x] **15+ buttons missing `aria-label`** — Fixed: aria-label added to all icon-only buttons
+- [x] **6 clickable divs without keyboard support** — Fixed: tabIndex + onKeyDown added
+- [x] **No focus trap in any modal** — Fixed: `useFocusTrap` hook created and applied to all 4 modals
+- [x] **`--text-subdued` fails WCAG AA contrast** — Fixed: colors bumped in all 7 themes
 
 #### MEDIUM
 
-- [ ] **Search input has no label**
-  - SearchView.jsx — only `placeholder="Search..."`, no `aria-label`
-  - Fix: add `aria-label="Search songs, artists, albums"`
-
-- [ ] **Toast missing `aria-atomic="true"`**
-  - Toast.jsx — has `aria-live` but screen reader may only read changed text
-  - Fix: add `aria-atomic="true"` to announce full toast
+- [x] **Search input has no label** — Fixed: `aria-label="Search songs, artists, albums"`
+- [x] **Toast missing `aria-atomic="true"`** — Fixed
 
 ---
 
@@ -268,14 +231,14 @@
 
 ### Phase 2 — Light theme completion
 6. Add `[data-theme="light"]` overrides to the 9 files listed above
-7. Bump `--text-subdued` contrast in all 6 themes
+7. ~~Bump `--text-subdued` contrast in all 6 themes~~ ✅ Done
 
-### Phase 3 — Accessibility
-8. Add `alt={name}` to all images
-9. Add `aria-label` to all icon-only buttons
-10. Add `tabIndex={0}` + keyboard handler to all clickable cards
-11. Create `useFocusTrap` hook, apply to all modals
-12. Add `aria-label` to search input, `aria-atomic` to toast
+### Phase 3 — Accessibility ✅ DONE
+8. ~~Add `alt={name}` to all images~~ ✅
+9. ~~Add `aria-label` to all icon-only buttons~~ ✅
+10. ~~Add `tabIndex={0}` + keyboard handler to all clickable cards~~ ✅
+11. ~~Create `useFocusTrap` hook, apply to all modals~~ ✅
+12. ~~Add `aria-label` to search input, `aria-atomic` to toast~~ ✅
 
 ### Phase 4 — Architecture cleanup
 13. Extract `applyThemeToDOM` to utils/

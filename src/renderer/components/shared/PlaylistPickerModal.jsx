@@ -1,5 +1,7 @@
+import { useRef } from 'preact/hooks';
 import { playlists, likedSongs, saveState } from '../../state/index.js';
 import { showToast, showInputModal, pickerVisible, pickerTracks, cleanupPicker } from '../../state/ui.js';
+import { useFocusTrap } from '../../hooks/useFocusTrap.js';
 
 export { showPlaylistPicker } from '../../state/ui.js';
 
@@ -18,7 +20,11 @@ function addTracksToPlaylist(playlist, tracks) {
 }
 
 export function PlaylistPickerModal() {
-  if (!pickerVisible.value) return null;
+  const visible = pickerVisible.value;
+  const trapRef = useRef(null);
+  useFocusTrap(trapRef, visible);
+
+  if (!visible) return null;
 
   const tracks = pickerTracks.value;
   const allPlaylists = playlists.value;
@@ -70,7 +76,7 @@ export function PlaylistPickerModal() {
 
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="picker-modal-title" onClick={onOverlay} onKeyDown={onKey}>
-      <div className="modal-box picker-box">
+      <div className="modal-box picker-box" ref={trapRef}>
         <h3 id="picker-modal-title">Add to playlist</h3>
         <div className="picker-list">
           {/* Liked Songs */}

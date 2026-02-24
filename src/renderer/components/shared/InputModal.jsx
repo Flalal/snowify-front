@@ -1,11 +1,15 @@
 import { useEffect, useRef } from 'preact/hooks';
 import { modalVisible, modalTitle, modalDefaultValue, cleanupInputModal } from '../../state/ui.js';
+import { useFocusTrap } from '../../hooks/useFocusTrap.js';
 
 export { showInputModal } from '../../state/ui.js';
 
 export function InputModal() {
   const inputRef = useRef(null);
+  const modalRef = useRef(null);
   const visible = modalVisible.value;
+
+  useFocusTrap(modalRef, visible);
 
   useEffect(() => {
     if (visible && inputRef.current) {
@@ -38,7 +42,7 @@ export function InputModal() {
 
   return (
     <div id="input-modal" className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="input-modal-title" onClick={onOverlay}>
-      <div className="modal-box">
+      <div className="modal-box" ref={modalRef}>
         <h3 id="input-modal-title">{modalTitle.value}</h3>
         <input
           ref={inputRef}

@@ -1,6 +1,6 @@
 export function PlaylistCover({ playlist, size = 'sm' }) {
   if (playlist.coverImage) {
-    return <img src={`file://${encodeURI(playlist.coverImage)}`} alt="" />;
+    return <img src={`file://${encodeURI(playlist.coverImage)}`} alt={playlist.name} />;
   }
   if (playlist.tracks.length >= 4) {
     const thumbs = playlist.tracks.slice(0, 4).map(t => t.thumbnail);
@@ -11,7 +11,7 @@ export function PlaylistCover({ playlist, size = 'sm' }) {
     );
   }
   if (playlist.tracks.length > 0) {
-    return <img src={playlist.tracks[0].thumbnail} alt="" />;
+    return <img src={playlist.tracks[0].thumbnail} alt={playlist.name} />;
   }
   const iconSize = size === 'lg' ? 64 : size === 'md' ? 32 : 20;
   return (
