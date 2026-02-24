@@ -1,56 +1,42 @@
-import { useState } from 'preact/hooks';
 import { playlists, likedSongs, saveState, currentView } from '../../state/index.js';
 import { TrackList } from '../shared/TrackList.jsx';
+import { PlaylistCover } from '../shared/PlaylistCover.jsx';
 import { showToast } from '../shared/Toast.jsx';
 import { showInputModal } from '../shared/InputModal.jsx';
 import { showContextMenu } from '../shared/ContextMenu.jsx';
 import { shuffleArray } from '../../utils/shuffleArray.js';
+import { useNavigation } from '../../hooks/useNavigation.js';
+import { useLikeTrack } from '../../hooks/useLikeTrack.js';
 
-/**
- * PlaylistView - Detail view for a playlist (liked songs or custom).
- *
- * Props:
- *   playlist       - the playlist object { id, name, tracks, coverImage? }
- *   isLiked        - whether this is the Liked Songs playlist
- *   onPlayFromList - callback(tracks, index)
- *   onLike         - callback(track, buttonEl)
- *   onContextMenu  - callback(e, track) (general context menu)
- *   onDragStart    - callback(e, track)
- */
-export function PlaylistView({
-  playlist,
-  isLiked,
-  onPlayFromList,
-  onLike,
-  onContextMenu,
-  onDragStart
-}) {
-  // Force re-render key for after mutations
-  const [renderKey, setRenderKey] = useState(0);
+export function PlaylistView({ playlist, isLiked }) {
+  const { playFromList } = useNavigation();
+  const handleLike = useLikeTrack();
 
   if (!playlist) return null;
 
-  // Get live tracks reference - for liked songs use signal, for custom use playlist object
-  const tracks = isLiked ? likedSongs.value : playlist.tracks;
+  // Read the live playlist from the signal to get immutable updates
+  const livePlaylist = isLiked ? playlist : (playlists.value.find(p => p.id === playlist.id) || playlist);
+  const tracks = isLiked ? likedSongs.value : livePlaylist.tracks;
 
   function handlePlayAll() {
-    if (tracks.length && onPlayFromList) onPlayFromList(tracks, 0);
+    if (tracks.length) playFromList(tracks, 0);
   }
 
   function handleShuffle() {
-    if (tracks.length && onPlayFromList) {
-      onPlayFromList(shuffleArray([...tracks]), 0);
+    if (tracks.length) {
+      playFromList(shuffleArray([...tracks]), 0);
     }
   }
 
   async function handleRename() {
     if (isLiked) return;
-    const newName = await showInputModal('Rename playlist', playlist.name);
-    if (newName && newName !== playlist.name) {
-      playlist.name = newName;
+    const newName = await showInputModal('Rename playlist', livePlaylist.name);
+    if (newName && newName !== livePlaylist.name) {
+      playlists.value = playlists.value.map(p =>
+        p.id === playlist.id ? { ...p, name: newName } : p
+      );
       saveState();
-      showToast(`Renamed to "${playlist.name}"`);
-      setRenderKey(k => k + 1);
+      showToast(`Renamed to "${newName}"`);
     }
   }
 
@@ -58,15 +44,16 @@ export function PlaylistView({
     if (isLiked) return;
     const filePath = await window.snowify.pickImage();
     if (!filePath) return;
-    if (playlist.coverImage) {
-      await window.snowify.deleteImage(playlist.coverImage);
+    if (livePlaylist.coverImage) {
+      await window.snowify.deleteImage(livePlaylist.coverImage);
     }
     const savedPath = await window.snowify.saveImage(playlist.id, filePath);
     if (savedPath) {
-      playlist.coverImage = savedPath;
+      playlists.value = playlists.value.map(p =>
+        p.id === playlist.id ? { ...p, coverImage: savedPath } : p
+      );
       saveState();
       showToast('Cover image updated');
-      setRenderKey(k => k + 1);
     } else {
       showToast('Failed to save image');
     }
@@ -74,23 +61,23 @@ export function PlaylistView({
 
   function handleDelete() {
     if (isLiked) return;
-    if (confirm(`Delete "${playlist.name}"?\nThis cannot be undone.`)) {
-      if (playlist.coverImage) window.snowify.deleteImage(playlist.coverImage);
+    if (confirm(`Delete "${livePlaylist.name}"?\nThis cannot be undone.`)) {
+      if (livePlaylist.coverImage) window.snowify.deleteImage(livePlaylist.coverImage);
       playlists.value = playlists.value.filter(p => p.id !== playlist.id);
       saveState();
       currentView.value = 'library';
-      showToast(`Deleted "${playlist.name}"`);
+      showToast(`Deleted "${livePlaylist.name}"`);
     }
   }
 
   function handlePlay(trackList, index) {
-    if (onPlayFromList) onPlayFromList(trackList, index);
+    playFromList(trackList, index);
   }
 
   function handlePlaylistTrackContextMenu(e, track) {
     showContextMenu(e, track, {
-      onPlay: (t) => { if (onPlayFromList) onPlayFromList([t], 0); },
-      onLike: (t) => { if (onLike) onLike(t, null); },
+      onPlay: (t) => { playFromList([t], 0); },
+      onLike: (t) => { handleLike(t, null); },
     });
   }
 
@@ -110,44 +97,24 @@ export function PlaylistView({
       );
     }
 
-    const hasCover = playlist.coverImage || tracks.length > 0;
+    const hasCover = livePlaylist.coverImage || tracks.length > 0;
     const bgStyle = hasCover ? {} : { background: 'linear-gradient(135deg, #450af5, #8e2de2)' };
-
-    let coverContent;
-    if (playlist.coverImage) {
-      coverContent = <img src={`file://${encodeURI(playlist.coverImage)}`} alt="" />;
-    } else if (tracks.length >= 4) {
-      const thumbs = tracks.slice(0, 4).map(t => t.thumbnail);
-      coverContent = (
-        <div className="playlist-cover-grid playlist-cover-lg">
-          {thumbs.map((t, i) => <img key={i} src={t} alt="" />)}
-        </div>
-      );
-    } else if (tracks.length > 0) {
-      coverContent = <img src={tracks[0].thumbnail} alt="" />;
-    } else {
-      coverContent = (
-        <svg width="64" height="64" viewBox="0 0 24 24" fill="#535353">
-          <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-        </svg>
-      );
-    }
 
     return (
       <div id="playlist-hero-cover" className="playlist-hero-cover" style={bgStyle}>
-        {coverContent}
+        <PlaylistCover playlist={livePlaylist} size="lg" />
       </div>
     );
   }
 
   return (
-    <div key={renderKey}>
+    <div>
       {/* Hero header */}
       <div className="playlist-hero">
         {renderCover()}
         <div className="playlist-hero-info">
           <div className="playlist-hero-label">PLAYLIST</div>
-          <h1 id="playlist-hero-name">{playlist.name}</h1>
+          <h1 id="playlist-hero-name">{livePlaylist.name}</h1>
           <p id="playlist-hero-count">
             {tracks.length} song{tracks.length !== 1 ? 's' : ''}
           </p>
@@ -214,9 +181,8 @@ export function PlaylistView({
             tracks={tracks}
             context="playlist"
             onPlay={handlePlay}
-            onLike={onLike}
+            onLike={handleLike}
             onContextMenu={handlePlaylistTrackContextMenu}
-            onDragStart={onDragStart}
           />
         ) : (
           <div className="empty-state">

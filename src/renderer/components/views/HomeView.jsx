@@ -6,30 +6,12 @@ import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { AlbumCard } from '../shared/AlbumCard.jsx';
 import { ScrollContainer } from '../shared/ScrollContainer.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
+import { useNavigation } from '../../hooks/useNavigation.js';
 import { HOME_RELEASES_CACHE_TTL } from '../../../shared/constants.js';
 
-/**
- * HomeView - Landing page with greeting, quick picks, recent tracks,
- * new releases from followed artists, and recommended songs.
- *
- * Props:
- *   onPlayFromList    - callback(tracks, index)
- *   onShowAlbum       - callback(albumId, albumMeta)
- *   onOpenArtist      - callback(artistId)
- *   onContextMenu     - callback(e, track)
- *   onDragStart       - callback(e, track)
- *   onAlbumPlay       - callback(albumId)
- *   onAlbumContextMenu - callback(e, albumId, albumMeta)
- */
-export function HomeView({
-  onPlayFromList,
-  onShowAlbum,
-  onOpenArtist,
-  onContextMenu,
-  onDragStart,
-  onAlbumPlay,
-  onAlbumContextMenu
-}) {
+export function HomeView() {
+  const { playFromList, showAlbumDetail, openArtistPage, playAlbum } = useNavigation();
+
   const [greeting, setGreeting] = useState('');
   const [releases, setReleases] = useState(null);
   const [releasesLoading, setReleasesLoading] = useState(false);
@@ -196,16 +178,16 @@ export function HomeView({
   }, [recent, liked]);
 
   const handleTrackPlay = useCallback((track) => {
-    if (onPlayFromList) onPlayFromList([track], 0);
-  }, [onPlayFromList]);
+    playFromList([track], 0);
+  }, [playFromList]);
 
   const handleAlbumClick = useCallback((albumId, album) => {
-    if (onShowAlbum) onShowAlbum(albumId, album);
-  }, [onShowAlbum]);
+    showAlbumDetail(albumId, album);
+  }, [showAlbumDetail]);
 
   const handleAlbumPlayClick = useCallback((albumId) => {
-    if (onAlbumPlay) onAlbumPlay(albumId);
-  }, [onAlbumPlay]);
+    playAlbum(albumId);
+  }, [playAlbum]);
 
   const quickPicks = recent.slice(0, 6);
   const recentCards = recent.slice(0, 8);
@@ -227,8 +209,6 @@ export function HomeView({
               data-track-id={track.id}
               draggable="true"
               onClick={() => handleTrackPlay(track)}
-              onContextMenu={(e) => { if (onContextMenu) onContextMenu(e, track); }}
-              onDragStart={(e) => { if (onDragStart) onDragStart(e, track); }}
             >
               <img src={track.thumbnail} alt="" />
               <span>{track.title}</span>
@@ -261,8 +241,6 @@ export function HomeView({
                 key={track.id}
                 track={track}
                 onPlay={handleTrackPlay}
-                onContextMenu={onContextMenu}
-                onDragStart={onDragStart}
               />
             ))
           )}
@@ -289,7 +267,6 @@ export function HomeView({
                     album={album}
                     onPlay={handleAlbumPlayClick}
                     onClick={handleAlbumClick}
-                    onContextMenu={onAlbumContextMenu}
                   />
                 ))}
               </ScrollContainer>
@@ -308,8 +285,6 @@ export function HomeView({
                 key={track.id}
                 track={track}
                 onPlay={handleTrackPlay}
-                onContextMenu={onContextMenu}
-                onDragStart={onDragStart}
               />
             ))}
           </div>

@@ -6,6 +6,7 @@ import { ScrollContainer } from '../shared/ScrollContainer.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
 import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { showToast } from '../shared/Toast.jsx';
+import { useNavigation } from '../../hooks/useNavigation.js';
 import { EXPLORE_CACHE_TTL } from '../../../shared/constants.js';
 
 const MOOD_COLORS = [
@@ -44,29 +45,9 @@ async function fetchChartsData() {
   return _chartsCache;
 }
 
-/**
- * ExploreView - Browse new albums, trending songs, top artists, music videos, moods & genres.
- *
- * Props:
- *   onPlayFromList       - callback(tracks, index)
- *   onShowAlbum          - callback(albumId, albumMeta)
- *   onOpenArtist         - callback(artistId)
- *   onOpenVideoPlayer    - callback(videoId, name, artist)
- *   onContextMenu        - callback(e, track)
- *   onAlbumPlay          - callback(albumId)
- *   onAlbumContextMenu   - callback(e, albumId, albumMeta)
- *   onNavigateSettings   - callback() to switch to settings view
- */
-export function ExploreView({
-  onPlayFromList,
-  onShowAlbum,
-  onOpenArtist,
-  onOpenVideoPlayer,
-  onContextMenu,
-  onAlbumPlay,
-  onAlbumContextMenu,
-  onNavigateSettings
-}) {
+export function ExploreView() {
+  const { playFromList, showAlbumDetail, openArtistPage, openVideoPlayer, playAlbum } = useNavigation();
+
   const [loading, setLoading] = useState(true);
   const [exploreData, setExploreData] = useState(null);
   const [chartsData, setChartsData] = useState(null);
@@ -102,31 +83,31 @@ export function ExploreView({
   }, [countryVal]);
 
   const handleAlbumClick = useCallback((albumId, album) => {
-    if (onShowAlbum) onShowAlbum(albumId, album);
-  }, [onShowAlbum]);
+    showAlbumDetail(albumId, album);
+  }, [showAlbumDetail]);
 
   const handleAlbumPlayClick = useCallback((albumId) => {
-    if (onAlbumPlay) onAlbumPlay(albumId);
-  }, [onAlbumPlay]);
+    playAlbum(albumId);
+  }, [playAlbum]);
 
   const handleArtistClick = useCallback((artistId) => {
-    if (onOpenArtist) onOpenArtist(artistId);
-  }, [onOpenArtist]);
+    openArtistPage(artistId);
+  }, [openArtistPage]);
 
   const handleVideoClick = useCallback((video) => {
     const id = video.videoId || video.id;
     const name = video.name || video.title;
-    if (onOpenVideoPlayer) onOpenVideoPlayer(id, name, video.artist);
-  }, [onOpenVideoPlayer]);
+    openVideoPlayer(id, name, video.artist);
+  }, [openVideoPlayer]);
 
   const handleTopSongClick = useCallback((track, index, topSongsList) => {
-    if (onPlayFromList) onPlayFromList(topSongsList, index);
-  }, [onPlayFromList]);
+    playFromList(topSongsList, index);
+  }, [playFromList]);
 
   const handleMusicVideoClick = useCallback((video) => {
-    // Explore music videos play as audio via onPlayFromList
-    if (onPlayFromList) onPlayFromList([video], 0);
-  }, [onPlayFromList]);
+    // Explore music videos play as audio via playFromList
+    playFromList([video], 0);
+  }, [playFromList]);
 
   async function handleMoodClick(browseId, params, label) {
     setMoodLoading(true);
@@ -155,18 +136,13 @@ export function ExploreView({
     try {
       const vids = await window.snowify.getPlaylistVideos?.(playlistId);
       if (vids?.length) {
-        if (onPlayFromList) onPlayFromList(vids, 0);
+        playFromList(vids, 0);
       } else {
         showToast('Could not load playlist');
       }
     } catch {
       showToast('Could not load playlist');
     }
-  }
-
-  function handleCountryLink(e) {
-    e.preventDefault();
-    if (onNavigateSettings) onNavigateSettings();
   }
 
   if (loading) {
@@ -202,11 +178,7 @@ export function ExploreView({
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z" />
           </svg>
           <span>
-            Set your{' '}
-            <a href="#" id="explore-country-link" onClick={handleCountryLink}>
-              country in Settings
-            </a>{' '}
-            for more relevant recommendations
+            Set your country in Settings for more relevant recommendations
           </span>
         </div>
       )}
@@ -222,7 +194,6 @@ export function ExploreView({
                 className="top-song-item"
                 data-track-id={track.id}
                 onClick={() => handleTopSongClick(track, i, topSongs)}
-                onContextMenu={(e) => { if (onContextMenu) { e.preventDefault(); onContextMenu(e, track); } }}
               >
                 <div className="top-song-rank">{track.rank || i + 1}</div>
                 <div className="top-song-thumb-wrap">
@@ -278,7 +249,6 @@ export function ExploreView({
                     className="video-card"
                     data-video-id={videoId}
                     onClick={() => handleMusicVideoClick(v)}
-                    onContextMenu={(e) => { if (onContextMenu) { e.preventDefault(); onContextMenu(e, v); } }}
                   >
                     <img className="video-card-thumb" src={v.thumbnail} alt="" loading="lazy" />
                     <button

@@ -1,7 +1,7 @@
 import { useCallback } from 'preact/hooks';
 import { likedSongs, saveState } from '../state/index.js';
 import { showToast } from '../components/shared/Toast.jsx';
-import { spawnHeartParticles } from '../components/NowPlayingBar/NowPlayingBar.jsx';
+import { spawnHeartParticles } from '../utils/spawnHeartParticles.js';
 
 /**
  * Hook that returns a toggle function for liking/unliking tracks.

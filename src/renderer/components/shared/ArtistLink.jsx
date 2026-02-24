@@ -1,4 +1,4 @@
-import { currentView } from '../../state/index.js';
+import { useNavigation } from '../../hooks/useNavigation.js';
 
 /**
  * Renders clickable artist name(s) that navigate to an artist page.
@@ -10,16 +10,15 @@ import { currentView } from '../../state/index.js';
  * Replaces the old renderArtistLinks + bindArtistLinks pattern from the vanilla JS code.
  */
 export function ArtistLink({ track }) {
+  const { openArtistPage } = useNavigation();
+
   if (!track) return <span>Unknown Artist</span>;
 
   // Handler to navigate to the artist page
   function goToArtist(e, artistId) {
     e.stopPropagation();
     if (!artistId) return;
-    // Set state for navigation; the parent App component will handle loading artist data
-    currentView.value = 'artist';
-    // Dispatch a custom event so the app layer can respond with the artist ID
-    window.dispatchEvent(new CustomEvent('navigate-artist', { detail: { artistId } }));
+    openArtistPage(artistId);
   }
 
   // Multiple artists array

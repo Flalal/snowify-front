@@ -8,35 +8,14 @@ import { ScrollContainer } from '../shared/ScrollContainer.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
 import { showToast } from '../shared/Toast.jsx';
 import { showPlaylistPicker } from '../shared/PlaylistPickerModal.jsx';
+import { useNavigation } from '../../hooks/useNavigation.js';
+import { useLikeTrack } from '../../hooks/useLikeTrack.js';
 import { HomeView } from './HomeView.jsx';
 
-/**
- * ArtistView - Full artist page with banner, popular tracks, discography, videos, similar artists.
- *
- * Props:
- *   artistId           - the artist channel ID
- *   onPlayFromList     - callback(tracks, index)
- *   onShowAlbum        - callback(albumId, albumMeta)
- *   onOpenVideoPlayer  - callback(videoId, name, artist)
- *   onOpenArtist       - callback(artistId)
- *   onLike             - callback(track, buttonEl)
- *   onContextMenu      - callback(e, track)
- *   onDragStart        - callback(e, track)
- *   onAlbumPlay        - callback(albumId)
- *   onAlbumContextMenu - callback(e, albumId, albumMeta)
- */
-export function ArtistView({
-  artistId,
-  onPlayFromList,
-  onShowAlbum,
-  onOpenVideoPlayer,
-  onOpenArtist,
-  onLike,
-  onContextMenu,
-  onDragStart,
-  onAlbumPlay,
-  onAlbumContextMenu
-}) {
+export function ArtistView({ artistId }) {
+  const { playFromList, showAlbumDetail, openVideoPlayer, openArtistPage, playAlbum } = useNavigation();
+  const handleLike = useLikeTrack();
+
   const [info, setInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [discoFilter, setDiscoFilter] = useState('all');
@@ -94,29 +73,29 @@ export function ArtistView({
 
   function handlePlayAll() {
     const popular = (info?.topSongs || []).slice(0, 5);
-    if (popular.length && onPlayFromList) onPlayFromList(popular, 0);
+    if (popular.length) playFromList(popular, 0);
   }
 
   function handlePlay(tracks, index) {
-    if (onPlayFromList) onPlayFromList(tracks, index);
+    playFromList(tracks, index);
   }
 
   const handleAlbumClick = useCallback((albumId, album) => {
-    if (onShowAlbum) onShowAlbum(albumId, album);
-  }, [onShowAlbum]);
+    showAlbumDetail(albumId, album);
+  }, [showAlbumDetail]);
 
   const handleAlbumPlayClick = useCallback((albumId) => {
-    if (onAlbumPlay) onAlbumPlay(albumId);
-  }, [onAlbumPlay]);
+    playAlbum(albumId);
+  }, [playAlbum]);
 
   function handleVideoClick(video) {
     const id = video.videoId || video.id;
     const name = video.name || video.title;
-    if (onOpenVideoPlayer) onOpenVideoPlayer(id, name, video.artist);
+    openVideoPlayer(id, name, video.artist);
   }
 
   function handleSimilarArtistClick(aid) {
-    if (onOpenArtist) onOpenArtist(aid);
+    openArtistPage(aid);
   }
 
   if (loading) {
@@ -228,9 +207,7 @@ export function ArtistView({
               tracks={popular}
               context="artist-popular"
               onPlay={handlePlay}
-              onLike={onLike}
-              onContextMenu={onContextMenu}
-              onDragStart={onDragStart}
+              onLike={handleLike}
             />
           ) : (
             <div className="empty-state"><p>No tracks found for this artist.</p></div>
@@ -264,7 +241,6 @@ export function ArtistView({
                       album={album}
                       onPlay={handleAlbumPlayClick}
                       onClick={handleAlbumClick}
-                      onContextMenu={onAlbumContextMenu}
                     />
                   ))}
                 </div>

@@ -1,5 +1,6 @@
 import { signal } from '@preact/signals';
-import { useEffect, useRef } from 'preact/hooks';
+import { useRef } from 'preact/hooks';
+import { useContextMenu } from '../../hooks/useContextMenu.js';
 import { playlists, currentView, currentPlaylistId, saveState } from '../../state/index.js';
 import { showInputModal } from './InputModal.jsx';
 import { removeContextMenu } from './ContextMenu.jsx';
@@ -34,32 +35,7 @@ export function PlaylistContextMenu() {
   const index = menuIndex.value;
   const total = menuTotal.value;
 
-  // Close on outside click
-  useEffect(() => {
-    if (!visible) return;
-    const handler = () => {
-      removePlaylistContextMenu();
-    };
-    const timer = setTimeout(() => {
-      document.addEventListener('click', handler, { once: true });
-    }, 10);
-    return () => {
-      clearTimeout(timer);
-      document.removeEventListener('click', handler);
-    };
-  }, [visible]);
-
-  // Reposition if overflowing
-  useEffect(() => {
-    if (!visible || !menuRef.current) return;
-    const rect = menuRef.current.getBoundingClientRect();
-    if (rect.right > window.innerWidth) {
-      menuRef.current.style.left = (window.innerWidth - rect.width - 8) + 'px';
-    }
-    if (rect.bottom > window.innerHeight) {
-      menuRef.current.style.top = (window.innerHeight - rect.height - 8) + 'px';
-    }
-  }, [visible, menuX.value, menuY.value]);
+  useContextMenu(menuRef, visible, menuX.value, menuY.value, removePlaylistContextMenu);
 
   if (!visible || !playlist) return null;
 

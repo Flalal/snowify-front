@@ -2,25 +2,14 @@ import { useState, useEffect, useRef, useCallback } from 'preact/hooks';
 import { musicOnly } from '../../state/index.js';
 import { TrackList } from '../shared/TrackList.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
+import { useNavigation } from '../../hooks/useNavigation.js';
+import { useLikeTrack } from '../../hooks/useLikeTrack.js';
 import { SEARCH_DEBOUNCE_MS } from '../../../shared/constants.js';
 
-/**
- * SearchView - Search input with debounce, artist result card, and song results.
- *
- * Props:
- *   onPlayFromList    - callback(tracks, index)
- *   onOpenArtist      - callback(artistId)
- *   onLike            - callback(track, buttonEl)
- *   onContextMenu     - callback(e, track)
- *   onDragStart       - callback(e, track)
- */
-export function SearchView({
-  onPlayFromList,
-  onOpenArtist,
-  onLike,
-  onContextMenu,
-  onDragStart
-}) {
+export function SearchView() {
+  const { playFromList, openArtistPage } = useNavigation();
+  const handleLike = useLikeTrack();
+
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);
   const [artists, setArtists] = useState([]);
@@ -105,7 +94,7 @@ export function SearchView({
   }
 
   function handlePlay(trackList, index) {
-    if (onPlayFromList) onPlayFromList(trackList, index);
+    playFromList(trackList, index);
   }
 
   const topArtist = artists[0] || null;
@@ -172,7 +161,7 @@ export function SearchView({
             <div
               className="artist-result-card"
               data-artist-id={topArtist.artistId}
-              onClick={() => { if (onOpenArtist) onOpenArtist(topArtist.artistId); }}
+              onClick={() => openArtistPage(topArtist.artistId)}
             >
               <img
                 className="artist-result-avatar"
@@ -197,9 +186,7 @@ export function SearchView({
               tracks={tracks}
               context="search"
               onPlay={handlePlay}
-              onLike={onLike}
-              onContextMenu={onContextMenu}
-              onDragStart={onDragStart}
+              onLike={handleLike}
             />
           </div>
         )}

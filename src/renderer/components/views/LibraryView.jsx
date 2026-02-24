@@ -2,15 +2,12 @@ import { useCallback } from 'preact/hooks';
 import { playlists, likedSongs, saveState } from '../../state/index.js';
 import { showInputModal } from '../shared/InputModal.jsx';
 import { showToast } from '../shared/Toast.jsx';
+import { useNavigation } from '../../hooks/useNavigation.js';
+import { PlaylistCover } from '../shared/PlaylistCover.jsx';
 
-/**
- * LibraryView - Grid of all playlists (liked songs + custom playlists).
- *
- * Props:
- *   onShowPlaylist   - callback(playlist, isLiked) when a playlist card is clicked
- *   onCreatePlaylist - callback(name) to create a new playlist
- */
-export function LibraryView({ onShowPlaylist, onCreatePlaylist }) {
+export function LibraryView() {
+  const { showPlaylistDetail } = useNavigation();
+
   const playlistList = playlists.value;
   const liked = likedSongs.value;
 
@@ -21,42 +18,20 @@ export function LibraryView({ onShowPlaylist, onCreatePlaylist }) {
 
   const handleCardClick = useCallback((pid) => {
     if (pid === 'liked') {
-      if (onShowPlaylist) {
-        onShowPlaylist({ id: 'liked', name: 'Liked Songs', tracks: liked }, true);
-      }
+      showPlaylistDetail({ id: 'liked', name: 'Liked Songs', tracks: liked }, true);
     } else {
       const pl = playlistList.find(p => p.id === pid);
-      if (pl && onShowPlaylist) onShowPlaylist(pl, false);
+      if (pl) showPlaylistDetail(pl, false);
     }
-  }, [onShowPlaylist, playlistList, liked]);
+  }, [showPlaylistDetail, playlistList, liked]);
 
   async function handleCreatePlaylist() {
     const name = await showInputModal('Create playlist', 'My Playlist');
-    if (name && onCreatePlaylist) onCreatePlaylist(name);
-  }
-
-  function getPlaylistCoverHtml(playlist) {
-    if (playlist.coverImage) {
-      return (
-        <img src={`file://${encodeURI(playlist.coverImage)}`} alt="" />
-      );
+    if (name) {
+      playlists.value = [...playlists.value, { id: 'pl_' + Date.now(), name, tracks: [] }];
+      saveState();
+      showToast(`Created "${name}"`);
     }
-    if (playlist.tracks.length >= 4) {
-      const thumbs = playlist.tracks.slice(0, 4).map(t => t.thumbnail);
-      return (
-        <div className="playlist-cover-grid">
-          {thumbs.map((t, i) => <img key={i} src={t} alt="" />)}
-        </div>
-      );
-    }
-    if (playlist.tracks.length > 0) {
-      return <img src={playlist.tracks[0].thumbnail} alt="" />;
-    }
-    return (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="#535353">
-        <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55C7.79 13 6 14.79 6 17s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
-      </svg>
-    );
   }
 
   // Empty state: no playlists and no liked songs
@@ -91,7 +66,7 @@ export function LibraryView({ onShowPlaylist, onCreatePlaylist }) {
             </div>
           ) : (
             <div className="lib-card-cover">
-              {getPlaylistCoverHtml(p)}
+              <PlaylistCover playlist={p} size="md" />
             </div>
           );
 

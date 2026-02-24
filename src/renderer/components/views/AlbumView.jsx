@@ -3,26 +3,13 @@ import { TrackList } from '../shared/TrackList.jsx';
 import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { Spinner } from '../shared/Spinner.jsx';
 import { showPlaylistPicker } from '../shared/PlaylistPickerModal.jsx';
+import { useNavigation } from '../../hooks/useNavigation.js';
+import { useLikeTrack } from '../../hooks/useLikeTrack.js';
 
-/**
- * AlbumView - Album detail page with hero header and track list.
- *
- * Props:
- *   albumId        - the album browse ID
- *   albumMeta      - optional meta object { name, thumbnail, year, type }
- *   onPlayFromList - callback(tracks, index)
- *   onLike         - callback(track, buttonEl)
- *   onContextMenu  - callback(e, track)
- *   onDragStart    - callback(e, track)
- */
-export function AlbumView({
-  albumId,
-  albumMeta,
-  onPlayFromList,
-  onLike,
-  onContextMenu,
-  onDragStart
-}) {
+export function AlbumView({ albumId, albumMeta }) {
+  const { playFromList } = useNavigation();
+  const handleLike = useLikeTrack();
+
   const [album, setAlbum] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -59,20 +46,20 @@ export function AlbumView({
   }, [albumId]);
 
   function handlePlayAll() {
-    if (album && album.tracks.length && onPlayFromList) {
-      onPlayFromList(album.tracks, 0);
+    if (album && album.tracks.length) {
+      playFromList(album.tracks, 0);
     }
   }
 
   function handleShuffle() {
-    if (album && album.tracks.length && onPlayFromList) {
+    if (album && album.tracks.length) {
       const shuffled = [...album.tracks].sort(() => Math.random() - 0.5);
-      onPlayFromList(shuffled, 0);
+      playFromList(shuffled, 0);
     }
   }
 
   function handlePlay(tracks, index) {
-    if (onPlayFromList) onPlayFromList(tracks, index);
+    playFromList(tracks, index);
   }
 
   // Derive display values
@@ -83,9 +70,6 @@ export function AlbumView({
   // Build meta line parts
   const metaParts = [];
   if (album) {
-    if (album.artist) {
-      // Artist link will be rendered separately
-    }
     if (albumMeta?.year) metaParts.push(String(albumMeta.year));
     if (album.tracks) {
       metaParts.push(`${album.tracks.length} song${album.tracks.length !== 1 ? 's' : ''}`);
@@ -156,9 +140,7 @@ export function AlbumView({
             tracks={album.tracks}
             context="album"
             onPlay={handlePlay}
-            onLike={onLike}
-            onContextMenu={onContextMenu}
-            onDragStart={onDragStart}
+            onLike={handleLike}
           />
         )}
       </div>
