@@ -7,11 +7,15 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="theme-color" content="#121212" />
   <title>Snowify</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <!-- Load the API adapter BEFORE the app so window.snowify is ready -->
   <script type="module" src="/src/api-adapter.js"></script>
 </head>
 <body>
   <div id="app"></div>
+  <audio id="audio-player" preload="auto"></audio>
   <script type="module" src="/src/main.jsx"></script>
 </body>
 </html>
