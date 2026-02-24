@@ -1,6 +1,9 @@
 const { contextBridge, ipcRenderer } = require('electron')
 
 contextBridge.exposeInMainWorld('snowify', {
+  // Logging
+  log: (level, ...args) => ipcRenderer.send('log:renderer', level, ...args),
+
   // Window controls
   minimize: () => ipcRenderer.send('window:minimize'),
   maximize: () => ipcRenderer.send('window:maximize'),
@@ -59,6 +62,11 @@ contextBridge.exposeInMainWorld('snowify', {
   },
   getAppVersion: () => ipcRenderer.invoke('app:version'),
   onYtMusicInitError: (cb) => ipcRenderer.on('ytmusic-init-error', () => cb()),
+
+  // Secure Token Storage
+  authSaveTokens: (tokens) => ipcRenderer.invoke('auth:saveTokens', tokens),
+  authLoadTokens: () => ipcRenderer.invoke('auth:loadTokens'),
+  authClearTokens: () => ipcRenderer.invoke('auth:clearTokens'),
 
   // Cloud Sync & Auth
   authConfigure: (config) => ipcRenderer.invoke('auth:configure', config),

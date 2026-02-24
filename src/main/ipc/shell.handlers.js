@@ -1,6 +1,7 @@
 // ─── Window & Shell IPC Handlers ───
 
 import { shell } from 'electron';
+import { createHandler } from './middleware.js';
 
 export function register(ipcMain, deps) {
   const { getMainWindow } = deps;
@@ -13,9 +14,9 @@ export function register(ipcMain, deps) {
   });
   ipcMain.on('window:close', () => getMainWindow()?.close());
 
-  ipcMain.handle('shell:openExternal', async (_event, url) => {
+  ipcMain.handle('shell:openExternal', createHandler('shell:openExternal', async (_event, url) => {
     if (typeof url === 'string' && (url.startsWith('https://') || url.startsWith('http://'))) {
       await shell.openExternal(url);
     }
-  });
+  }));
 }

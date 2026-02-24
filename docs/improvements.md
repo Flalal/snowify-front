@@ -1,6 +1,7 @@
 # Snowify Frontend — Pending Improvements
 
 Stack audit: 2026-02-24 on v1.4.8. Global score: **7.1/10**.
+Updated: 2026-02-24 on v1.4.9 — items 1, 2, 3 resolved.
 
 Scores by category:
 
@@ -8,34 +9,28 @@ Scores by category:
 |----------|-------|-------|
 | Architecture | 8/10 | Good main/renderer/preload separation |
 | Performance | 7/10 | Good caches, but watchdog too frequent |
-| Security | 7/10 | Sandbox good, but data not encrypted |
+| Security | 8.5/10 | Sandbox good, tokens encrypted via safeStorage |
 | Code Quality | 6/10 | Duplication, no linting, no tests |
-| State Management | 8/10 | Signals excellent, but no middleware |
-| Error Handling | 5/10 | Ad-hoc, no centralized logging |
+| State Management | 8/10 | Signals excellent, IPC middleware in place |
+| Error Handling | 7.5/10 | Centralized IPC middleware + structured logging |
 | CSS | 7/10 | Well organized, but not scoped |
 | Dependencies | 8/10 | Minimalist, modern, up to date |
 
 ---
 
-## Critical (before production)
+## Critical (before production) — DONE (v1.4.9)
 
-### 1. Sensitive data stored in plaintext
-- **Problem:** `cloudApiKey`, tokens, full app state saved as unencrypted JSON in localStorage
-- **Impact:** Any app with disk access can read user tokens
-- **Fix:** Use `electron safeStorage` API or Keytar for tokens/API keys
-- **Files:** `src/renderer/state/index.js`, `src/preload/index.js`
+### ~~1. Sensitive data stored in plaintext~~ DONE
+- **Fix applied:** Tokens encrypted via `electron.safeStorage` in `userData/secure-tokens.json`. Removed from `PERSISTENT_KEYS` / localStorage. Auto-migration on first launch.
+- **Files:** `src/main/services/secureStore.js` (new), `src/main/ipc/auth.handlers.js`, `src/renderer/state/index.js`, `src/renderer/hooks/useAppInit.js`, `src/renderer/components/views/settings/CloudSyncSection.jsx`, `src/preload/index.js`
 
-### 2. No IPC middleware
-- **Problem:** 10 IPC handlers with inconsistent validation, error handling, and logging
-- **Impact:** Some handlers throw, others return null, no input validation
-- **Fix:** Create `registerHandler(name, schema, fn)` wrapper with zod schema validation + centralized try/catch + structured error response
-- **Files:** `src/main/ipc/*.handlers.js`
+### ~~2. No IPC middleware~~ DONE
+- **Fix applied:** `createHandler(channel, fn, fallback)` and `createOkHandler(channel, fn)` in `src/main/ipc/middleware.js`. All 10 handler files wrapped. Centralized try/catch + structured error logging via `[IPC:channel]` prefix.
+- **Files:** `src/main/ipc/middleware.js` (new), all 10 `*.handlers.js`
 
-### 3. No structured logging
-- **Problem:** ~30 `console.error/warn/log` calls, all lost when app closes
-- **Impact:** Can't debug production crashes, no audit trail for sync/auth
-- **Fix:** Integrate Winston or Pino with file rotation + log levels (debug/info/warn/error)
-- **Files:** Create `src/main/utils/logger.js`, use everywhere
+### ~~3. No structured logging~~ DONE
+- **Fix applied:** `electron-log` patches `console.*` globally in main process. Logs to `userData/logs/main.log`. Renderer can log via `window.snowify.log(level, ...args)` IPC. Global crash handlers for `uncaughtException` + `unhandledRejection`.
+- **Files:** `src/main/services/logger.js` (new), `src/main/index.js`, `src/preload/index.js`
 
 ---
 

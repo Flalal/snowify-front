@@ -1,7 +1,13 @@
 // ─── Main Entry Point ───
 
+import './services/logger.js'; // Must be first — patches console.* globally
+
 import { app, BrowserWindow, ipcMain, session, nativeImage } from 'electron';
 import path from 'path';
+
+// ─── Global crash handlers ───
+process.on('uncaughtException', (err) => console.error('Uncaught exception:', err));
+process.on('unhandledRejection', (reason) => console.error('Unhandled rejection:', reason));
 
 // ─── Services ───
 import { initYTMusic, getYtMusic } from './services/ytmusic.js';
@@ -95,6 +101,12 @@ authHandlers.register(ipcMain, deps);
 
 // ─── App Version ───
 ipcMain.handle('app:version', () => app.getVersion());
+
+// ─── Renderer logging via IPC ───
+ipcMain.on('log:renderer', (_event, level, ...args) => {
+  const fn = console[level] || console.log;
+  fn('[renderer]', ...args);
+});
 
 // ─── GPU cache fix (Windows permission errors) ───
 if (process.env.ELECTRON_RENDERER_URL) {

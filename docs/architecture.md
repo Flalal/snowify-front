@@ -13,9 +13,10 @@ snowify-front/
 │   ├── main/                        # Electron main process
 │   │   ├── index.js                 # Entry: window, IPC, services init
 │   │   ├── ipc/                     # 10 IPC handler modules
-│   │   │   ├── auth.handlers.js     # Login, register, logout, sync (76 lines)
+│   │   │   ├── middleware.js         # createHandler / createOkHandler wrappers
+│   │   │   ├── auth.handlers.js     # Login, register, logout, sync, secure tokens
 │   │   │   ├── discord.handlers.js  # Discord RPC
-│   │   │   ├── explore.handlers.js  # Home/explore data (283 lines, heaviest)
+│   │   │   ├── explore.handlers.js  # Home/explore data (heaviest)
 │   │   │   ├── lyrics.handlers.js   # Lyrics fetching
 │   │   │   ├── playlist.handlers.js # Playlist CRUD
 │   │   │   ├── search.handlers.js   # Search queries
@@ -24,6 +25,8 @@ snowify-front/
 │   │   │   ├── stream.handlers.js   # Stream URL resolution
 │   │   │   └── updater.handlers.js  # Auto-update events
 │   │   ├── services/
+│   │   │   ├── logger.js            # electron-log config (first import, patches console.*)
+│   │   │   ├── secureStore.js       # safeStorage encryption for tokens
 │   │   │   ├── ytmusic.js           # YTMusic API wrapper
 │   │   │   ├── stream.js            # yt-dlp extraction + cache (4h TTL, 200 max)
 │   │   │   ├── lyrics.js            # Synclyrics LRU cache
@@ -136,12 +139,18 @@ Pull: GET /sync/pull → mergeState()
 ### State persistence
 ```
 Signal change → saveState() (debounced)
-  → JSON.stringify all PERSISTENT_KEYS
+  → JSON.stringify all PERSISTENT_KEYS (excludes tokens)
   → localStorage.setItem('snowify_state', data)
 
 App start → loadState()
   → localStorage.getItem → JSON.parse
   → Restore each signal.value
+  → authLoadTokens() via IPC → secureStore.loadTokens()
+  → Tokens decrypted via safeStorage → signals updated
+
+Token storage:
+  → safeStorage.encryptString() → Base64 → userData/secure-tokens.json
+  → Fallback: plaintext JSON if no keyring (Linux without gnome-keyring)
 ```
 
 ## Caching strategy
@@ -151,6 +160,7 @@ App start → loadState()
 | Lyrics | main/services/lyrics.js | session | LRU | LRU eviction |
 | Explore data | renderer/services/exploreCache.js | 30min | - | TTL |
 | API dedup | renderer/services/api.js | request duration | - | Auto-delete on resolve |
+| Log files | userData/logs/main.log | rotation by electron-log | - | Auto-rotate |
 
 ## Accessibility (implemented)
 - All modals: `role="dialog"`, `aria-modal`, `aria-labelledby`, `useFocusTrap`

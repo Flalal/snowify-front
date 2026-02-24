@@ -62,8 +62,7 @@ const PERSISTENT_KEYS = {
   volume, shuffle, repeat, musicOnly, autoplay,
   audioQuality, videoQuality, videoPremuxed,
   animations, effects, theme, discordRpc, country,
-  cloudSyncEnabled, cloudApiUrl, cloudApiKey, cloudUser,
-  cloudAccessToken, cloudRefreshToken, lastSyncAt
+  cloudSyncEnabled, cloudApiUrl, cloudUser, lastSyncAt
 };
 
 function _writeState() {
@@ -135,10 +134,7 @@ export function loadState() {
       country.value = saved.country || '';
       cloudSyncEnabled.value = saved.cloudSyncEnabled ?? false;
       cloudApiUrl.value = saved.cloudApiUrl || '';
-      cloudApiKey.value = saved.cloudApiKey || '';
       cloudUser.value = saved.cloudUser || null;
-      cloudAccessToken.value = saved.cloudAccessToken || '';
-      cloudRefreshToken.value = saved.cloudRefreshToken || '';
       lastSyncAt.value = saved.lastSyncAt || '';
     }
   } catch (err) {

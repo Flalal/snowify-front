@@ -21,7 +21,11 @@ export function CloudSyncSection() {
 
   function handleApiKeyChange(e) {
     cloudApiKey.value = e.currentTarget.value;
-    saveState();
+    window.snowify.authSaveTokens({
+      accessToken: cloudAccessToken.value,
+      refreshToken: cloudRefreshToken.value,
+      apiKey: cloudApiKey.value
+    });
   }
 
   async function handleSyncToggle(e) {
@@ -56,6 +60,11 @@ export function CloudSyncSection() {
       cloudAccessToken.value = result.accessToken;
       cloudRefreshToken.value = result.refreshToken;
       cloudSyncEnabled.value = true;
+      window.snowify.authSaveTokens({
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        apiKey: cloudApiKey.value
+      });
       saveState();
       setAuthMode(null);
       setAuthEmail('');
@@ -74,6 +83,7 @@ export function CloudSyncSection() {
     cloudRefreshToken.value = '';
     cloudSyncEnabled.value = false;
     lastSyncAt.value = '';
+    window.snowify.authClearTokens();
     saveState();
     showToast('Logged out');
   }
