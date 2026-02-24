@@ -1,17 +1,17 @@
 # Frontend Audit — Snowify v1.4.8
 
-> Date: 2026-02-24 | Score: **6.5 / 10**
+> Date: 2026-02-24 | Score: ~~6.5~~ → **9 / 10**
 
 | Category | Score | Weight | Notes |
 |----------|-------|--------|-------|
-| Architecture & Code | 8/10 | 35% | Solid hook decomposition, no leaks, clean deps |
-| CSS & Theming | 5.5/10 | 20% | Broken variables, incomplete light theme, no responsive |
-| Accessibility | 4/10 | 25% | ARIA basics done, missing alt/labels/focus-trap/contrast |
-| Performance | 7.5/10 | 20% | Good lazy/virtual, minor image/memoization gaps |
+| Architecture & Code | ~~8~~ → 9.5/10 | 35% | All HIGH/MEDIUM fixed; 1 LOW remaining (NowPlayingBar prop drilling) |
+| CSS & Theming | ~~5.5~~ → 9/10 | 20% | Light theme complete, responsive breakpoints added; 2 LOW remaining |
+| Accessibility | ~~4~~ → 9.5/10 | 25% | All items fixed — ARIA, alt, labels, focus-trap, contrast |
+| Performance | ~~7.5~~ → 9/10 | 20% | All MEDIUM fixed — lazy images, virtualization, useCallback; 2 LOW remaining |
 
 ---
 
-## 1. Architecture & Code (8/10)
+## 1. Architecture & Code (8/10 → **9.5/10**)
 
 ### What's good
 
@@ -53,7 +53,7 @@
 
 ---
 
-## 2. CSS & Theming (5.5/10 → **7/10**)
+## 2. CSS & Theming (5.5/10 → **9/10**)
 
 ### What's good
 
@@ -101,7 +101,7 @@
 
 ---
 
-## 3. Accessibility (4/10 → **9/10**)
+## 3. Accessibility (4/10 → **9.5/10**)
 
 ### What's good
 
@@ -135,7 +135,7 @@
 
 ---
 
-## 4. Performance (7.5/10)
+## 4. Performance (7.5/10 → **9/10**)
 
 ### What's good
 
@@ -170,7 +170,7 @@
 
 ---
 
-## Roadmap to 10/10
+## Roadmap to 10/10 — ✅ All phases complete
 
 ### Phase 1 — CSS fixes (quick wins) ✅ DONE
 1. ~~Define the 3 missing variables in variables.css~~ ✅
