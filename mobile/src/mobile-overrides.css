@@ -392,8 +392,14 @@ select {
   bottom: calc(var(--now-playing-height, 72px) + var(--mobile-nav-height) + 16px + var(--safe-bottom)) !important;
   left: 16px !important;
   right: 16px !important;
+  transform: translateY(20px) !important;
+  text-align: center;
   max-width: 100% !important;
   z-index: 500;
+}
+
+.toast.show {
+  transform: translateY(0) !important;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

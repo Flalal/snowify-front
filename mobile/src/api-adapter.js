@@ -120,8 +120,9 @@ window.snowify = {
     apiFetch(`/lyrics?track=${encodeURIComponent(trackName || '')}&artist=${encodeURIComponent(artistName || '')}&album=${encodeURIComponent(albumName || '')}&duration=${duration || ''}`),
 
   // ─── Auth ───
-  authConfigure: ({ baseUrl }) => {
+  authConfigure: ({ baseUrl, apiKey }) => {
     localStorage.setItem(API_URL_KEY, baseUrl);
+    if (apiKey !== undefined) localStorage.setItem(API_KEY_KEY, apiKey || '');
     return Promise.resolve({ ok: true });
   },
   authLogin: async (email, password) => {
@@ -183,12 +184,46 @@ window.snowify = {
     }
   },
   syncMerge: (local, remote) => {
-    // Simple client-side merge (same logic as desktop)
-    const playlists = mergeById(local.playlists, remote.playlists, 'updated_at');
-    const likedSongs = mergeById(local.likedSongs, remote.likedSongs, 'liked_at');
-    const historyIds = new Set(local.recentTracks.map(h => h.id));
-    const newHistory = (remote.history || []).filter(h => !historyIds.has(h.track_id || h.id));
+    // Playlists: merge by id, remote wins if updated_at is newer
+    const localPlaylistMap = new Map((local.playlists || []).map(p => [p.id, p]));
+    for (const rp of (remote.playlists || [])) {
+      const lp = localPlaylistMap.get(rp.id);
+      if (!lp || (rp.updated_at && rp.updated_at > (lp.updated_at || ''))) {
+        localPlaylistMap.set(rp.id, {
+          id: rp.id,
+          name: rp.name,
+          description: rp.description || '',
+          coverImage: rp.coverImage || '',
+          position: rp.position ?? 0,
+          updated_at: rp.updated_at,
+          tracks: (rp.tracks || []).map(t => mapTrack(t))
+        });
+      }
+    }
+    const playlists = [...localPlaylistMap.values()].filter(p => !p.deleted_at);
+
+    // Liked songs: merge by track id
+    const localLikedMap = new Map((local.likedSongs || []).map(s => [s.id, s]));
+    for (const rs of (remote.likedSongs || [])) {
+      const trackId = rs.track_id || rs.id;
+      const ls = localLikedMap.get(trackId);
+      if (!ls || (rs.liked_at && rs.liked_at > (ls.liked_at || ''))) {
+        if (rs.deleted_at) {
+          localLikedMap.delete(trackId);
+        } else {
+          localLikedMap.set(trackId, { ...mapTrack(rs), liked_at: rs.liked_at });
+        }
+      }
+    }
+    const likedSongs = [...localLikedMap.values()];
+
+    // History: append new entries (dedupe by id)
+    const historyIds = new Set((local.recentTracks || []).map(h => h.id));
+    const newHistory = (remote.history || [])
+      .filter(h => !historyIds.has(h.track_id || h.id))
+      .map(h => ({ ...mapTrack(h), played_at: h.played_at }));
     const recentTracks = [...newHistory, ...local.recentTracks];
+
     return Promise.resolve({ playlists, likedSongs, recentTracks });
   },
   onTokensUpdated: () => {}, // no-op on mobile, tokens managed via localStorage
@@ -220,19 +255,19 @@ window.snowify = {
   onYtMusicInitError: () => {},
 };
 
-// ─── Helper: merge arrays by id, LWW by timestamp field ───
-function mergeById(localArr, remoteArr, tsField) {
-  const map = new Map((localArr || []).map(item => [item.id, item]));
-  for (const rItem of (remoteArr || [])) {
-    const id = rItem.track_id || rItem.id;
-    const lItem = map.get(id);
-    if (!lItem || (rItem[tsField] && rItem[tsField] > (lItem[tsField] || ''))) {
-      if (rItem.deleted_at) {
-        map.delete(id);
-      } else {
-        map.set(id, { ...rItem, id });
-      }
-    }
-  }
-  return [...map.values()];
+// ─── Helper: map server-format track to client-format ───
+function mapTrack(t) {
+  return {
+    id: t.track_id || t.id,
+    title: t.title,
+    artist: t.artist,
+    artistId: t.artist_id || t.artistId,
+    artists: t.artists || (t.artists_json ? JSON.parse(t.artists_json) : []),
+    album: t.album,
+    albumId: t.album_id || t.albumId,
+    thumbnail: t.thumbnail,
+    duration: t.duration,
+    durationMs: t.duration_ms || t.durationMs,
+    url: t.url
+  };
 }

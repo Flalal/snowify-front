@@ -274,11 +274,47 @@ export function SettingsView({ onRenderHome }) {
         recentTracks: recentTracks.value,
         settings: { volume: volume.value, theme: theme.value, audioQuality: audioQuality.value }
       };
-      await window.snowify.syncPush(localState);
+      const pushResult = await window.snowify.syncPush(localState);
 
       // Pull remote changes
       const pullResult = await window.snowify.syncPull();
-      if (pullResult.ok && pullResult.data) {
+      if (!pullResult.ok) throw new Error(pullResult.error || 'Pull failed');
+      if (pullResult.data) {
+        const merged = await window.snowify.syncMerge(
+          { playlists: playlists.value, likedSongs: likedSongs.value, recentTracks: recentTracks.value },
+          pullResult.data
+        );
+        playlists.value = merged.playlists;
+        likedSongs.value = merged.likedSongs;
+        recentTracks.value = merged.recentTracks;
+      }
+      lastSyncAt.value = (pullResult.data && pullResult.data.syncTimestamp)
+        || pushResult.syncTimestamp
+        || new Date().toISOString();
+      saveState();
+      setSyncStatus('done');
+      showToast('Sync complete');
+      setTimeout(() => setSyncStatus('idle'), 2000);
+    } catch (err) {
+      setSyncStatus('error');
+      showToast('Sync failed: ' + err.message);
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }
+  }
+
+  async function handleSyncPullOnly() {
+    if (!cloudAccessToken.value || !cloudApiUrl.value) return;
+    setSyncStatus('syncing');
+    try {
+      await window.snowify.authConfigure({
+        baseUrl: cloudApiUrl.value,
+        accessToken: cloudAccessToken.value,
+        refreshToken: cloudRefreshToken.value,
+        apiKey: cloudApiKey.value
+      });
+      const pullResult = await window.snowify.syncPull();
+      if (!pullResult.ok) throw new Error(pullResult.error || 'Pull failed');
+      if (pullResult.data) {
         const merged = await window.snowify.syncMerge(
           { playlists: playlists.value, likedSongs: likedSongs.value, recentTracks: recentTracks.value },
           pullResult.data
@@ -290,11 +326,11 @@ export function SettingsView({ onRenderHome }) {
         saveState();
       }
       setSyncStatus('done');
-      showToast('Sync complete');
+      showToast('Pull complete');
       setTimeout(() => setSyncStatus('idle'), 2000);
     } catch (err) {
       setSyncStatus('error');
-      showToast('Sync failed: ' + err.message);
+      showToast('Pull failed: ' + err.message);
       setTimeout(() => setSyncStatus('idle'), 3000);
     }
   }
@@ -552,6 +588,13 @@ export function SettingsView({ onRenderHome }) {
                 disabled={syncStatus === 'syncing'}
               >
                 {syncStatus === 'syncing' ? 'Syncing...' : syncStatus === 'done' ? 'Done!' : 'Sync now'}
+              </button>
+              <button
+                className="btn-secondary"
+                onClick={handleSyncPullOnly}
+                disabled={syncStatus === 'syncing'}
+              >
+                {syncStatus === 'syncing' ? 'Pulling...' : 'Pull'}
               </button>
               <button
                 className="btn-secondary"
