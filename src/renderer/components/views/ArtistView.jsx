@@ -56,13 +56,17 @@ export function ArtistView({ artistId }) {
     showToast('Link copied to clipboard');
   }
 
+  const artistSource = info
+    ? { type: 'artist', artistId, artistName: info.name }
+    : null;
+
   function handlePlayAll() {
     const popular = (info?.topSongs || []).slice(0, 5);
-    if (popular.length) playFromList(popular, 0);
+    if (popular.length) playFromList(popular, 0, artistSource);
   }
 
   function handlePlay(tracks, index) {
-    playFromList(tracks, index);
+    playFromList(tracks, index, artistSource);
   }
 
   const handleAlbumClick = useCallback(

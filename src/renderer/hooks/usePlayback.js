@@ -8,7 +8,7 @@ import { useQueueControls } from './useQueueControls.js';
 import { usePlaybackWatchdog } from './usePlaybackWatchdog.js';
 
 export function usePlayback() {
-  const { getAudio, playTrack, playFromList, prefetchNextTrack, onTrackPlayedRef } =
+  const { getAudio, playTrack, playFromList, prefetchNextTrack, onTrackPlayedRef, loadingLockRef } =
     useTrackPlayer();
   const {
     smartQueueFill,
@@ -38,6 +38,10 @@ export function usePlayback() {
 
     const onEnded = () => playNextRef.current();
     const onError = () => {
+      // Skip if playTrack is actively loading — its own catch block handles errors.
+      // This prevents double-handling (persistent handler + catch block) which causes
+      // cascading playNext calls and concurrent playTrack races.
+      if (loadingLockRef.current) return;
       handlePlaybackError({ reason: 'audio_error', playNext: playNextRef.current });
     };
     const onSeeked = () => {

@@ -58,6 +58,8 @@ const POPULAR_MOODS = new Set([
   'metal'
 ]);
 
+const EXPLORE_SOURCE = { type: 'explore' };
+
 export function ExploreView() {
   const { playFromList, openArtistPage } = useNavigation();
 
@@ -84,7 +86,7 @@ export function ExploreView() {
 
   const handleTopSongClick = useCallback(
     (track, index, topSongsList) => {
-      playFromList(topSongsList, index);
+      playFromList(topSongsList, index, EXPLORE_SOURCE);
     },
     [playFromList]
   );
@@ -92,7 +94,7 @@ export function ExploreView() {
   const handleMusicVideoClick = useCallback(
     (video) => {
       // Explore music videos play as audio via playFromList
-      playFromList([video], 0);
+      playFromList([video], 0, EXPLORE_SOURCE);
     },
     [playFromList]
   );
@@ -124,7 +126,7 @@ export function ExploreView() {
     try {
       const vids = await api.getPlaylistVideos(playlistId);
       if (vids?.length) {
-        playFromList(vids, 0);
+        playFromList(vids, 0, EXPLORE_SOURCE);
       } else {
         showToast('Could not load playlist');
       }

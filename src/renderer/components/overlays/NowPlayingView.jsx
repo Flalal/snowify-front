@@ -9,12 +9,13 @@ import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { formatTime } from '../../utils/formatTime.js';
 
 export function NowPlayingView({ visible }) {
-  const { getAudio } = usePlaybackContext();
+  const { getAudio, playNext, playPrev } = usePlaybackContext();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [show, setShow] = useState(false);
   const viewRef = useRef(null);
-  const touchRef = useRef({ startY: 0, currentY: 0, swiping: false, started: false });
+  const artRef = useRef(null);
+  const touchRef = useRef({ startX: 0, startY: 0, currentX: 0, currentY: 0, swiping: false, started: false, direction: null });
 
   const audio = getAudio();
   const toggleLike = useLikeTrack();
@@ -56,29 +57,56 @@ export function NowPlayingView({ visible }) {
     return () => audio.removeEventListener('timeupdate', onTimeUpdate);
   }, [audio]);
 
-  // Swipe-to-close: native listener with { passive: false }
+  // Swipe handling: native listener with { passive: false }
+  // Detects direction on first significant movement:
+  //   - Horizontal → track skip (artwork follows finger)
+  //   - Vertical down → swipe-to-close (existing behavior)
   useEffect(() => {
     const el = viewRef.current;
     if (!el || !show) return;
 
     const onTouchMove = (e) => {
       if (!touchRef.current.started) return;
-      const deltaY = e.touches[0].clientY - touchRef.current.startY;
+      const dx = e.touches[0].clientX - touchRef.current.startX;
+      const dy = e.touches[0].clientY - touchRef.current.startY;
 
-      if (!touchRef.current.swiping) {
-        const content = el.querySelector('.np-view-content');
-        if (deltaY > 10 && (!content || content.scrollTop <= 0)) {
-          touchRef.current.swiping = true;
+      // Lock direction on first significant movement
+      if (!touchRef.current.direction) {
+        if (Math.abs(dx) > 10 || Math.abs(dy) > 10) {
+          if (Math.abs(dx) > Math.abs(dy)) {
+            touchRef.current.direction = 'horizontal';
+          } else {
+            const content = el.querySelector('.np-view-content');
+            if (dy > 0 && (!content || content.scrollTop <= 0)) {
+              touchRef.current.direction = 'vertical';
+              touchRef.current.swiping = true;
+            } else {
+              // Scrolling up in content — don't hijack
+              touchRef.current.started = false;
+              return;
+            }
+          }
         } else {
           return;
         }
       }
 
-      e.preventDefault();
-      touchRef.current.currentY = e.touches[0].clientY;
-      const dy = Math.max(0, touchRef.current.currentY - touchRef.current.startY);
-      el.style.transition = 'none';
-      el.style.transform = `translateY(${dy}px)`;
+      if (touchRef.current.direction === 'horizontal') {
+        e.preventDefault();
+        touchRef.current.currentX = e.touches[0].clientX;
+        const art = artRef.current;
+        if (art) {
+          art.style.transition = 'none';
+          art.style.transform = `translateX(${dx}px)`;
+          art.style.opacity = Math.max(0.5, 1 - Math.abs(dx) / 300);
+        }
+      } else if (touchRef.current.direction === 'vertical') {
+        e.preventDefault();
+        touchRef.current.currentY = e.touches[0].clientY;
+        const ddy = Math.max(0, touchRef.current.currentY - touchRef.current.startY);
+        el.style.transition = 'none';
+        el.style.transform = `translateY(${ddy}px)`;
+      }
     };
 
     el.addEventListener('touchmove', onTouchMove, { passive: false });
@@ -108,20 +136,43 @@ export function NowPlayingView({ visible }) {
   const handleTouchStart = (e) => {
     if (e.target.closest('button') || e.target.closest('.progress-bar')) return;
     touchRef.current = {
+      startX: e.touches[0].clientX,
       startY: e.touches[0].clientY,
+      currentX: e.touches[0].clientX,
       currentY: e.touches[0].clientY,
       swiping: false,
-      started: true
+      started: true,
+      direction: null
     };
   };
 
   const handleTouchEnd = () => {
-    if (!touchRef.current.swiping) {
-      touchRef.current.started = false;
+    const { direction, started } = touchRef.current;
+    if (!started && !direction) return;
+    touchRef.current.started = false;
+
+    if (direction === 'horizontal') {
+      const deltaX = touchRef.current.currentX - touchRef.current.startX;
+      const art = artRef.current;
+      if (art) {
+        art.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+        art.style.transform = '';
+        art.style.opacity = '';
+      }
+      if (Math.abs(deltaX) > 60) {
+        if (deltaX < 0) playNext();
+        else playPrev();
+      }
+      touchRef.current.direction = null;
       return;
     }
-    touchRef.current.started = false;
+
+    if (!touchRef.current.swiping) {
+      touchRef.current.direction = null;
+      return;
+    }
     touchRef.current.swiping = false;
+    touchRef.current.direction = null;
     const deltaY = touchRef.current.currentY - touchRef.current.startY;
     if (viewRef.current) {
       viewRef.current.style.transition = 'transform 0.35s ease-out';
@@ -143,6 +194,13 @@ export function NowPlayingView({ visible }) {
   const handleTouchCancel = () => {
     touchRef.current.started = false;
     touchRef.current.swiping = false;
+    touchRef.current.direction = null;
+    const art = artRef.current;
+    if (art) {
+      art.style.transition = 'transform 0.25s ease-out, opacity 0.25s ease-out';
+      art.style.transform = '';
+      art.style.opacity = '';
+    }
     if (viewRef.current) {
       viewRef.current.style.transition = 'transform 0.35s ease-out';
       viewRef.current.style.transform = 'translateY(0)';
@@ -169,9 +227,10 @@ export function NowPlayingView({ visible }) {
           <div className="np-view-pill" />
         </div>
 
-        {/* Artwork — fills available space */}
+        {/* Artwork — fills available space, swipe left/right to skip */}
         <div className="np-view-art-wrap">
           <img
+            ref={artRef}
             className="np-view-art"
             src={track.thumbnail}
             alt={track.title}

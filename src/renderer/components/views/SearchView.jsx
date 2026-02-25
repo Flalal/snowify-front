@@ -111,7 +111,7 @@ export function SearchView() {
 
   const handlePlay = useCallback(
     (trackList, index) => {
-      playFromList(trackList, index);
+      playFromList(trackList, index, { type: 'search' });
     },
     [playFromList]
   );

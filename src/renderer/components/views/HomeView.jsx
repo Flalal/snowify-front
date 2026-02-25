@@ -8,6 +8,8 @@ import { useNavigation } from '../../hooks/useNavigation.js';
 import { getCachedReleases, setCachedReleases } from '../../services/releasesCache.js';
 import { api } from '../../services/api.js';
 
+const HOME_SOURCE = { type: 'home' };
+
 export function HomeView() {
   const { playFromList, showAlbumDetail, playAlbum } = useNavigation();
 
@@ -179,7 +181,7 @@ export function HomeView() {
 
   const handleTrackPlay = useCallback(
     (track) => {
-      playFromList([track], 0);
+      playFromList([track], 0, HOME_SOURCE);
     },
     [playFromList]
   );
@@ -189,7 +191,7 @@ export function HomeView() {
       if (track.albumId) {
         showAlbumDetail(track.albumId, { name: track.album, thumbnail: track.thumbnail });
       } else {
-        playFromList([track], 0);
+        playFromList([track], 0, HOME_SOURCE);
       }
     },
     [showAlbumDetail, playFromList]

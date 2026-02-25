@@ -18,13 +18,15 @@ export function PlaylistView({ playlist, isLiked }) {
     : playlists.value.find((p) => p.id === playlist.id) || playlist;
   const tracks = isLiked ? likedSongs.value : livePlaylist.tracks;
 
+  const playlistSource = { type: 'playlist', playlistId: playlist.id };
+
   function handlePlayAll() {
-    if (tracks.length) playFromList(tracks, 0);
+    if (tracks.length) playFromList(tracks, 0, playlistSource);
   }
 
   function handleShuffle() {
     if (tracks.length) {
-      playFromList(shuffleArray(tracks), 0);
+      playFromList(shuffleArray(tracks), 0, playlistSource);
     }
   }
 
@@ -71,7 +73,7 @@ export function PlaylistView({ playlist, isLiked }) {
   }
 
   function handlePlay(trackList, index) {
-    playFromList(trackList, index);
+    playFromList(trackList, index, playlistSource);
   }
 
   function handleRemoveTrack(track) {
@@ -89,7 +91,7 @@ export function PlaylistView({ playlist, isLiked }) {
   function handlePlaylistTrackContextMenu(e, track) {
     showContextMenu(e, track, {
       onPlay: (t) => {
-        playFromList([t], 0);
+        playFromList([t], 0, playlistSource);
       },
       onLike: (t) => {
         handleLike(t, null);

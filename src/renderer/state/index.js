@@ -40,6 +40,9 @@ export const queueIndex = signal(-1);
 export const isPlaying = signal(false);
 export const isLoading = signal(false);
 export const currentPlaylistId = signal(null);
+// Context-aware queue continuation: tracks where playback originated from
+// Shape: null | { type: 'album'|'artist'|'playlist'|'search'|'explore'|'home', artistId?, artistName?, albumId?, playlistId? }
+export const playbackSource = signal(null);
 
 // ─── Computed signals ───
 export const currentTrack = computed(() => {

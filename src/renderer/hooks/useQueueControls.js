@@ -10,6 +10,7 @@ import {
   volume,
   autoplay,
   currentTrack,
+  playbackSource,
   saveState
 } from '../state/index.js';
 import { shuffleArray } from '../utils/shuffleArray.js';
@@ -79,6 +80,80 @@ export function useQueueControls(getAudio, playTrack) {
     }
   }, [playTrack]);
 
+  const contextQueueFill = useCallback(async () => {
+    if (fillingRef.current) return;
+    const current = currentTrack.value;
+    const source = playbackSource.value;
+    if (!current || !source) return;
+    fillingRef.current = true;
+
+    const isArtistContext = source.type === 'album' || source.type === 'artist';
+    showToast(
+      source.artistName
+        ? `Playing more from ${source.artistName}...`
+        : 'Finding related songs...'
+    );
+
+    try {
+      const queueIds = new Set(queue.value.map((t) => t.id));
+      const seen = new Set();
+      let pool = [];
+      const addToPool = (tracks) => {
+        tracks.forEach((t) => {
+          if (!queueIds.has(t.id) && !seen.has(t.id)) {
+            seen.add(t.id);
+            pool.push(t);
+          }
+        });
+      };
+
+      if (isArtistContext && source.artistId) {
+        // Artist/album context: prioritize artist's top songs
+        const info = await api.artistInfo(source.artistId);
+        if (info) addToPool(info.topSongs || []);
+        if (pool.length < AUTOPLAY_MIN_POOL) {
+          const upNexts = await api.getUpNexts(current.id);
+          addToPool(upNexts);
+        }
+      } else {
+        // Search/explore/home/playlist: prioritize YouTube up nexts
+        const upNexts = await api.getUpNexts(current.id);
+        addToPool(upNexts);
+        if (pool.length < AUTOPLAY_MIN_POOL && current.artistId) {
+          const info = await api.artistInfo(current.artistId);
+          if (info) addToPool(info.topSongs || []);
+        }
+      }
+
+      if (!pool.length) {
+        showToast('No similar songs found');
+        isPlaying.value = false;
+        return;
+      }
+
+      pool = shuffleArray(pool);
+      const maxAdd = Math.min(AUTOPLAY_ADD_COUNT, QUEUE_MAX_SIZE - queue.value.length);
+      if (maxAdd <= 0) {
+        const trim = Math.min(queueIndex.value, queue.value.length - QUEUE_MAX_SIZE / 2);
+        if (trim > 0) {
+          queue.value = queue.value.slice(trim);
+          queueIndex.value = queueIndex.value - trim;
+        }
+      }
+      const newTracks = pool.slice(0, Math.max(maxAdd, AUTOPLAY_MIN_POOL));
+      queue.value = [...queue.value, ...newTracks];
+      queueIndex.value = queueIndex.value + 1;
+      playTrack(queue.value[queueIndex.value]);
+      showToast(`Added ${newTracks.length} songs`);
+    } catch (err) {
+      console.error('Context queue fill error:', err);
+      showToast('Could not find more songs');
+      isPlaying.value = false;
+    } finally {
+      fillingRef.current = false;
+    }
+  }, [playTrack]);
+
   const playNext = useCallback(() => {
     const audio = getAudio();
     if (!queue.value.length) return;
@@ -107,6 +182,10 @@ export function useQueueControls(getAudio, playTrack) {
 
     const nextIdx = queueIndex.value + 1;
     if (nextIdx >= queue.value.length) {
+      if (playbackSource.value) {
+        contextQueueFill();
+        return;
+      }
       if (autoplay.value) {
         smartQueueFill();
         return;
@@ -116,7 +195,7 @@ export function useQueueControls(getAudio, playTrack) {
     }
     queueIndex.value = nextIdx;
     playTrack(queue.value[nextIdx]);
-  }, [playTrack, smartQueueFill]);
+  }, [playTrack, smartQueueFill, contextQueueFill]);
 
   const playPrev = useCallback(() => {
     const audio = getAudio();

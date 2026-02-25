@@ -20,20 +20,24 @@ export function AlbumView({ albumId, albumMeta }) {
 
   const hasError = error || (album && !album.tracks?.length);
 
+  const albumSource = album
+    ? { type: 'album', albumId, artistName: album.artist, artistId: album.artistId }
+    : null;
+
   function handlePlayAll() {
     if (album && album.tracks.length) {
-      playFromList(album.tracks, 0);
+      playFromList(album.tracks, 0, albumSource);
     }
   }
 
   function handleShuffle() {
     if (album && album.tracks.length) {
-      playFromList(shuffleArray(album.tracks), 0);
+      playFromList(shuffleArray(album.tracks), 0, albumSource);
     }
   }
 
   function handlePlay(tracks, index) {
-    playFromList(tracks, index);
+    playFromList(tracks, index, albumSource);
   }
 
   // Derive display values

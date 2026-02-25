@@ -101,7 +101,12 @@ export function useAppNavigation(playFromList, getAudio) {
         showToast('Loading album...');
         const album = await api.albumTracks(albumId);
         if (album?.tracks?.length) {
-          playFromList(album.tracks, 0);
+          playFromList(album.tracks, 0, {
+            type: 'album',
+            albumId,
+            artistName: album.artist,
+            artistId: album.artistId
+          });
         } else {
           showToast('Could not load album tracks');
         }

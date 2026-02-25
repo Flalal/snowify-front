@@ -10,7 +10,7 @@ import { ArtistLink } from '../shared/ArtistLink.jsx';
 import { useLikeTrack } from '../../hooks/useLikeTrack.js';
 
 export function NowPlayingBar() {
-  const { getAudio } = usePlaybackContext();
+  const { getAudio, playNext, playPrev } = usePlaybackContext();
   const { showAlbumDetail } = useNavigation();
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -32,25 +32,38 @@ export function NowPlayingBar() {
   const loading = isLoading.value;
 
   const toggleLike = useLikeTrack();
-  const barTouchRef = useRef({ startY: 0 });
+  const barTouchRef = useRef({ startX: 0, startY: 0, swipedAt: 0 });
 
   if (!track) return null;
 
   const handleBarClick = (e) => {
+    // Ignore click fired by the browser after a touch swipe
+    if (Date.now() - barTouchRef.current.swipedAt < 400) return;
     if (!window.__mobileMediaSession) return;
     if (e.target.closest('button') || e.target.closest('.progress-bar')) return;
     nowPlayingViewVisible.value = true;
   };
 
   const handleBarTouchStart = (e) => {
-    if (!window.__mobileMediaSession) return;
+    barTouchRef.current.startX = e.touches[0].clientX;
     barTouchRef.current.startY = e.touches[0].clientY;
   };
 
   const handleBarTouchEnd = (e) => {
-    if (!window.__mobileMediaSession) return;
+    const deltaX = e.changedTouches[0].clientX - barTouchRef.current.startX;
     const deltaY = e.changedTouches[0].clientY - barTouchRef.current.startY;
-    if (deltaY < -30) {
+
+    // Horizontal swipe: skip track
+    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 40) {
+      barTouchRef.current.swipedAt = Date.now();
+      if (deltaX < 0) playNext();
+      else playPrev();
+      return;
+    }
+
+    // Vertical swipe up → open NowPlayingView (mobile only)
+    if (window.__mobileMediaSession && deltaY < -30) {
+      barTouchRef.current.swipedAt = Date.now();
       nowPlayingViewVisible.value = true;
     }
   };

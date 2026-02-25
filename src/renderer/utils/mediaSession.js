@@ -28,10 +28,14 @@ export function updateMediaSession(track, { getAudio, playPrev, playNext }) {
 
 export function syncPositionState(audio) {
   if ('mediaSession' in navigator && audio.duration && isFinite(audio.duration)) {
-    navigator.mediaSession.setPositionState({
-      duration: audio.duration,
-      playbackRate: audio.playbackRate,
-      position: audio.currentTime
-    });
+    try {
+      navigator.mediaSession.setPositionState({
+        duration: audio.duration,
+        playbackRate: audio.playbackRate || 1,
+        position: Math.min(audio.currentTime, audio.duration)
+      });
+    } catch (_) {
+      // setPositionState can throw at track boundaries (position > duration due to float precision)
+    }
   }
 }

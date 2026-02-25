@@ -9,6 +9,7 @@ import {
   volume,
   audioQuality,
   recentTracks,
+  playbackSource,
   saveState
 } from '../state/index.js';
 import { shuffleArray } from '../utils/shuffleArray.js';
@@ -22,6 +23,7 @@ export function useTrackPlayer() {
   const audioRef = useRef(null);
   const skipAdvanceRef = useRef(false);
   const onTrackPlayedRef = useRef(null);
+  const loadingLockRef = useRef(false);
 
   const getAudio = useCallback(() => {
     if (!audioRef.current) {
@@ -49,7 +51,7 @@ export function useTrackPlayer() {
 
   const playTrack = useCallback(async (track) => {
     const audio = getAudio();
-    if (!audio) return;
+    if (!audio || !track) return;
 
     // ─── Cast branch: send to Chromecast instead of local audio ───
     if (isCasting.value) {
@@ -76,10 +78,13 @@ export function useTrackPlayer() {
       return;
     }
 
+    // Lock prevents the persistent onError handler from interfering
+    // while playTrack's own try/catch handles errors during load.
+    loadingLockRef.current = true;
     isLoading.value = true;
-    showToast(`Loading: ${track.title}`);
 
     try {
+      showToast(`Loading: ${track.title}`);
       const directUrl = await api.getStreamUrl(track.url, audioQuality.value);
       audio.src = directUrl;
       audio.volume = volume.value * VOLUME_SCALE;
@@ -105,12 +110,14 @@ export function useTrackPlayer() {
       await audio.play();
       isPlaying.value = true;
       isLoading.value = false;
+      loadingLockRef.current = false;
       addToRecent(track);
       updateDiscordPresence(track, audio);
       saveState();
       prefetchNextTrack();
       onTrackPlayedRef.current?.(track);
     } catch (err) {
+      loadingLockRef.current = false;
       console.error('Playback error:', err);
       handlePlaybackError({ reason: 'playback_failed', error: err, shouldAdvance: false });
       if (!skipAdvanceRef.current) {
@@ -128,7 +135,8 @@ export function useTrackPlayer() {
   }, []);
 
   const playFromList = useCallback(
-    (tracks, index) => {
+    (tracks, index, source = null) => {
+      playbackSource.value = source;
       originalQueue.value = [...tracks];
       if (shuffle.value) {
         const picked = tracks[index];
@@ -144,5 +152,5 @@ export function useTrackPlayer() {
     [playTrack]
   );
 
-  return { getAudio, playTrack, playFromList, prefetchNextTrack, onTrackPlayedRef };
+  return { getAudio, playTrack, playFromList, prefetchNextTrack, onTrackPlayedRef, loadingLockRef };
 }
